@@ -1,0 +1,21 @@
+#!/bin/bash
+
+set -e
+
+apt-get update
+apt-get -y install --no-install-recommends \
+    cython \
+    git \
+    python-dev \
+    python-numpy \
+    python-imaging \
+    python-matplotlib \
+    python-mpltoolkits.basemap \
+    ttf-bitstream-vera \
+    libhdf4-dev \
+    libhdfeos-dev
+
+git clone https://github.com/peterkuma/ccplot.git
+( cd ccplot ; python setup.py build_ext -I /usr/include/x86_64-linux-gnu/hdf )
+( cd ccplot ; sudo python setup.py install )
+
