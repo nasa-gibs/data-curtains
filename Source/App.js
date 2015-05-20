@@ -18,7 +18,6 @@ var viewer = new Cesium.Viewer("cesiumContainer", {
 });
 
 var CalipsoData;
-var curtain_entities = new Array();
 
 function readJSON(callback) {
     var xhttpObj = new XMLHttpRequest();
@@ -40,7 +39,6 @@ readJSON(function(responseText) {
 
 function visualize() {
 
-    var entityCounter = 0;
     var trackColor;
 
     for (var m = 0; m < CalipsoData["0"].curtains.length; m++) {
@@ -60,8 +58,8 @@ function visualize() {
 
 
 
-            curtain_entities.push(viewer.entities.add({
-                name: 'CALIPSO Data Curtain',
+            viewer.entities.add({
+                name: '532nm Total Attenuated Backscatter',
                 id: 'C' + m + 'S' + i,
                 description: "Date : " + CalipsoData["0"].date + "<br>Orbit : " + CalipsoData["0"].curtains[m].orbit + "<br>Start Time (UTC) :  " + CalipsoData["0"].curtains[m].sections[i].start_time + "<br>End Time (UTC) : " + CalipsoData["0"].curtains[m].sections[i].end_time,
                 wall: {
@@ -73,22 +71,13 @@ function visualize() {
                     //material: CalipsoData["0"].curtains[m].sections[i].img,
                     show: true
                 }
-            }));
-
-            entityCounter++;
+            });
 
         }
 
     }
 }
 
-/**
- * Returns the top-most Entity at the provided window coordinates
- * or undefined if no Entity is at that location.
- *
- * @param {Cartesian2} windowPosition The window coordinates.
- * @returns {Entity} The picked Entity or undefined.
- */
 function pickEntity(viewer, windowPosition) {
     var picked = viewer.scene.pick(windowPosition);
     if (Cesium.defined(picked)) {
@@ -98,16 +87,34 @@ function pickEntity(viewer, windowPosition) {
             var numberPattern = /\d+/g;
             var indices = entityInstance.id.match(numberPattern);
 
+	   if(entityInstance.wall.outline._value == true){
+	    //Display Data Curtains
             var coords = CalipsoData["0"].curtains[indices[0]].sections[indices[1]].coordinates;
             var maxHts = new Array(coords.length / 2);
             for (var j = 0; j < (coords.length / 2); j++) {
                 maxHts[j] = 2000000;
             }
 
-
             entityInstance.wall.outline = false;
             entityInstance.wall.maximumHeights = maxHts;
             entityInstance.wall.material = CalipsoData["0"].curtains[indices[0]].sections[indices[1]].img;
+	   } else {
+	    //Display Section Marker -- Toggle
+            var coords = CalipsoData["0"].curtains[indices[0]].sections[indices[1]].coordinates;
+            var maxHts = new Array(coords.length / 2);
+            for (var j = 0; j < (coords.length / 2); j++) {
+                maxHts[j] = 500000;
+            }
+
+        if (CalipsoData["0"].curtains[indices[0]].orbit == "Day-Time") {
+            trackColor = Cesium.Color.RED;
+        } else {
+            trackColor = Cesium.Color.BLUE;
+        }
+	    entityInstance.wall.maximumHeights = maxHts;
+	    entityInstance.wall.outline = true;
+	    entityInstance.wall.material = trackColor;
+    	   }
         }
     } else {
         console.log("undefined");
