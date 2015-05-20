@@ -18,6 +18,7 @@ var viewer = new Cesium.Viewer("cesiumContainer", {
 });
 
 var CalipsoData;
+var curtain_entities = new Array();
 
 function readJSON(callback) {
     var xhttpObj = new XMLHttpRequest();
@@ -38,110 +39,86 @@ readJSON(function(responseText) {
 });
 
 function visualize() {
-console.log(CalipsoData["0"].curtains.length);
-for(var m = 0; m < CalipsoData["0"].curtains.length; m++) {
-    for (var i = 0; i < CalipsoData["0"].curtains[m].sections.length; i++) {
-        var coords = CalipsoData["0"].curtains[m].sections[i].coordinates;
-        var maxHts = new Array(coords.length / 2);
-        for (var j = 0; j < (coords.length / 2); j++) {
-            maxHts[j] = 2000000;
+
+    var entityCounter = 0;
+    var trackColor;
+
+    for (var m = 0; m < CalipsoData["0"].curtains.length; m++) {
+
+        if (CalipsoData["0"].curtains[m].orbit == "Day-Time") {
+            trackColor = Cesium.Color.RED;
+        } else {
+            trackColor = Cesium.Color.BLUE;
         }
 
-        viewer.entities.add({
-            name: 'CALIPSO Data Curtain',
-	    description: "Date : "+ CalipsoData["0"].date +"<br>Orbit : "+CalipsoData["0"].curtains[m].orbit+"<br>Time (UTC) : "+CalipsoData["0"].curtains[m].utc_time,
-            wall: {
-                positions: Cesium.Cartesian3.fromDegreesArray(coords),
-                maximumHeights: maxHts,
-                material: CalipsoData["0"].curtains[m].sections[i].img,
-                show: true
+        for (var i = 0; i < CalipsoData["0"].curtains[m].sections.length; i++) {
+            var coords = CalipsoData["0"].curtains[m].sections[i].coordinates;
+            var maxHts = new Array(coords.length / 2);
+            for (var j = 0; j < (coords.length / 2); j++) {
+                maxHts[j] = 500000;
             }
-        });
-    }
 
+
+
+            curtain_entities.push(viewer.entities.add({
+                name: 'CALIPSO Data Curtain',
+                id: 'C' + m + 'S' + i,
+                description: "Date : " + CalipsoData["0"].date + "<br>Orbit : " + CalipsoData["0"].curtains[m].orbit + "<br>Start Time (UTC) :  " + CalipsoData["0"].curtains[m].sections[i].start_time + "<br>End Time (UTC) : " + CalipsoData["0"].curtains[m].sections[i].end_time,
+                wall: {
+                    positions: Cesium.Cartesian3.fromDegreesArray(coords),
+                    maximumHeights: maxHts,
+                    material: trackColor,
+                    outline: true,
+                    outlineColor: Cesium.Color.BLACK,
+                    //material: CalipsoData["0"].curtains[m].sections[i].img,
+                    show: true
+                }
+            }));
+
+            entityCounter++;
+
+        }
+
+    }
 }
-}
-/*
+
+/**
+ * Returns the top-most Entity at the provided window coordinates
+ * or undefined if no Entity is at that location.
+ *
+ * @param {Cartesian2} windowPosition The window coordinates.
+ * @returns {Entity} The picked Entity or undefined.
+ */
+function pickEntity(viewer, windowPosition) {
+    var picked = viewer.scene.pick(windowPosition);
+    if (Cesium.defined(picked)) {
+        var entityInstance = Cesium.defaultValue(picked.id, picked.primitive.id);
+        if (entityInstance instanceof Cesium.Entity) {
+            console.log(entityInstance.id);
+            var numberPattern = /\d+/g;
+            var indices = entityInstance.id.match(numberPattern);
+
+            var coords = CalipsoData["0"].curtains[indices[0]].sections[indices[1]].coordinates;
+            var maxHts = new Array(coords.length / 2);
+            for (var j = 0; j < (coords.length / 2); j++) {
+                maxHts[j] = 2000000;
+            }
+
+
+            entityInstance.wall.outline = false;
+            entityInstance.wall.maximumHeights = maxHts;
+            entityInstance.wall.material = CalipsoData["0"].curtains[indices[0]].sections[indices[1]].img;
+        }
+    } else {
+        console.log("undefined");
+    }
+};
+
 var scene = viewer.scene;
 
-
-
-
-      
-var CALIPSOdata1 = viewer.entities.add({
-    name : 'CALIPSO Data 1',
-    id : '1',
-    wall : {
-           positions : Cesium.Cartesian3.fromDegreesArray(CalipsoData["1"].coordinates),
-
-
-        maximumHeights : [ 2000000,2000000, 2000000, 2000000,2000000,2000000, 2000000,2000000,2000000],
-        material : CalipsoData["1"].img,
-        show: true
-    }
-});
-
-var CALIPSOdata2 = viewer.entities.add({
-    name : 'CALIPSO Data 2',
-    id : '2',
-    wall : {
-           positions : Cesium.Cartesian3.fromDegreesArray(CalipsoData["2"].coordinates),
-
-
-        maximumHeights : [ 2000000,2000000, 2000000, 2000000,2000000,2000000, 2000000,2000000,2000000],
-        material : CalipsoData["2"].img,
-        show: true
-
-    }
-});
-
-    var entity = viewer.entities.add({
-        label : {
-            show : false
-        }
-    });
-
-
 var ellipsoid = scene.globe.ellipsoid;
-     handler = new Cesium.ScreenSpaceEventHandler(scene.canvas);
-    handler.setInputAction(function(movement) {
-        var cartesian = viewer.camera.pickEllipsoid(movement.position, ellipsoid);
-        if (cartesian) {
-            var cartographic = ellipsoid.cartesianToCartographic(cartesian);
-            var longitudeString = Cesium.Math.toDegrees(cartographic.longitude).toFixed(2);
-            var latitudeString = Cesium.Math.toDegrees(cartographic.latitude).toFixed(2);
-
-            entity.position = cartesian;
-            entity.label.show = true;
-            entity.label.text = '(' + longitudeString + ', ' + latitudeString + ')';
-            //Logic to decide which Lidar Profile to show
-            var dist0 = Math.acos(Math.sin(latitudeString) * Math.sin(CalipsoData["0"].coordinates[0]) + Math.cos(latitudeString) * Math.cos(CalipsoData["0"].coordinates[0]) * Math.cos(Math.abs(longitudeString - CalipsoData["0"].coordinates[1]))) * 6371;
-            var dist1 = Math.acos(Math.sin(latitudeString) * Math.sin(CalipsoData["1"].coordinates[0]) + Math.cos(latitudeString) * Math.cos(CalipsoData["1"].coordinates[0]) * Math.cos(Math.abs(longitudeString - CalipsoData["1"].coordinates[1]))) * 6371;
-            var dist2 = Math.acos(Math.sin(latitudeString) * Math.sin(CalipsoData["2"].coordinates[0]) + Math.cos(latitudeString) * Math.cos(CalipsoData["2"].coordinates[0]) * Math.cos(Math.abs(longitudeString - CalipsoData["2"].coordinates[1]))) * 6371;
-            var minDist = Math.min(dist0,dist1,dist2);
-            console.log("Min. Distance = "+minDist+"km.");
-            if(minDist == dist0){
-                CALIPSOdata0.wall.show = true;
-                viewer.zoomTo(CALIPSOdata0);
-                CALIPSOdata1.wall.show = false;
-                CALIPSOdata2.wall.show = false;
-              }
-            else if (minDist == dist1){
-                CALIPSOdata1.wall.show = true;
-                viewer.zoomTo(CALIPSOdata1);
-                CALIPSOdata2.wall.show = false;
-                CALIPSOdata0.wall.show = false;
-              }
-            else {
-                CALIPSOdata2.wall.show = true;
-                viewer.zoomTo(CALIPSOdata2);
-                CALIPSOdata1.wall.show = false;
-                CALIPSOdata0.wall.show = false;
-              }
-
-
-        } else {
-            entity.label.show = false;
-        }
-    }, Cesium.ScreenSpaceEventType.LEFT_CLICK);*/
-
+handler = new Cesium.ScreenSpaceEventHandler(scene.canvas);
+handler.setInputAction(function(movement) {
+    //console.log(curtain_entities);
+    pickEntity(viewer, movement.position);
+}, Cesium.ScreenSpaceEventType.LEFT_CLICK);

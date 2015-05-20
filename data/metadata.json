@@ -4,10 +4,11 @@
         "curtains": [
             {
                 "orbit": "Day-Time",
-                "utc_time": "00:08:22",
                 "sections": [
                     {
                         "section": 1,
+			"start_time": "00:08:17",
+			"end_time": "00:21:46",
                         "img": "data/imagery/2015-01-01/1_1.png",
                         "coordinates": [
                             8.57,
@@ -30,6 +31,8 @@
                     },
                     {
                         "section": 2,
+			"start_time": "00:21:47",
+			"end_time": "00:35:16",
                         "img": "data/imagery/2015-01-01/1_2.png",
                         "coordinates": [
                             -139.55,
@@ -55,6 +58,8 @@
                     {
                         "section": 3,
                         "img": "data/imagery/2015-01-01/1_3.png",
+			"start_time": "00:35:16",
+			"end_time": "00:48:45",
                         "coordinates": [
                             -159.76,
                             -19.07,
@@ -78,6 +83,8 @@
                     },
                     {
                         "section": 4,
+			"start_time": "00:48:46",
+			"end_time": "01:00:48",
                         "img": "data/imagery/2015-01-01/1_4.png",
                         "coordinates": [
                             -170.7,
@@ -102,10 +109,11 @@
             },
 {
                 "orbit": "Night-Time",
-                "utc_time": "01:00:52",
                 "sections": [
                     {
                         "section": 1,
+			"start_time": "01:00:49",
+			"end_time": "01:14:18",
                         "img": "data/imagery/2015-01-01/2_1.png",
                         "coordinates": [
                             164.57,
@@ -130,6 +138,8 @@
                     },
                     {
                         "section": 2,
+			"start_time": "01:14:18",
+			"end_time": "01:27:47",
                         "img": "data/imagery/2015-01-01/2_2.png",
                         "coordinates": [
                             19.99,
@@ -154,6 +164,8 @@
                     },
                     {
                         "section": 3,
+			"start_time": "01:27:48",
+			"end_time": "01:41:16",
                         "img": "data/imagery/2015-01-01/2_3.png",
                         "coordinates": [
                             5.36,
@@ -178,6 +190,8 @@
                     },
                     {
                         "section": 4,
+			"start_time": "01:41:17",
+			"end_time": "01:47:09",
                         "img": "data/imagery/2015-01-01/2_4.png",
                         "coordinates": [
                             -6.31,
