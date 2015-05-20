@@ -37,6 +37,7 @@ readJSON(function(responseText) {
 
 });
 
+
 function visualize() {
 
     var trackColor;
@@ -67,9 +68,7 @@ function visualize() {
                     maximumHeights: maxHts,
                     material: trackColor,
                     outline: true,
-                    outlineColor: Cesium.Color.BLACK,
-                    //material: CalipsoData["0"].curtains[m].sections[i].img,
-                    show: true
+                    outlineColor: Cesium.Color.BLACK
                 }
             });
 
@@ -94,7 +93,7 @@ function pickEntity(viewer, windowPosition) {
             for (var j = 0; j < (coords.length / 2); j++) {
                 maxHts[j] = 2000000;
             }
-
+	    	
             entityInstance.wall.outline = false;
             entityInstance.wall.maximumHeights = maxHts;
             entityInstance.wall.material = CalipsoData["0"].curtains[indices[0]].sections[indices[1]].img;
