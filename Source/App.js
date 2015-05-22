@@ -1,6 +1,6 @@
 var provider = new Cesium.WebMapTileServiceImageryProvider({
-    url: "//map1.vis.earthdata.nasa.gov/wmts-webmerc/wmts.cgi?TIME=2015-03-22",
-    layer: "MODIS_Terra_CorrectedReflectance_TrueColor",
+    url: "//map1.vis.earthdata.nasa.gov/wmts-webmerc/wmts.cgi?TIME=2015-01-01",//Will require the date to be changed dynamically, from the Cesium Timeline Widget input.
+    layer: "MODIS_Aqua_CorrectedReflectance_TrueColor",
     style: "",
     format: "image/jpeg",
     tileMatrixSetID: "GoogleMapsCompatible_Level9",
