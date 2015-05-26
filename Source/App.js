@@ -54,10 +54,10 @@ viewer.timeline.zoomTo(viewer.clock.startTime, viewer.clock.stopTime);
 
 
 function visualize(dateString) {
-
+   var trackColor, dateIndex = 0;
  viewer.entities.removeAll();
 console.log("In Visualize");
-   var trackColor, dateIndex = 0;
+
  //  console.log(CalipsoData.length);
 
    for(var i = 0; i < CalipsoData.length;i++) {
@@ -67,8 +67,16 @@ console.log("In Visualize");
 		dateIndex = i;
 		console.log("dateIndex is set to");
 		console.log(dateIndex);
+		break;
+	} else {
+	dateIndex = -1;
 	}
+	
    }
+//Data of selected date unavailable
+if(dateIndex == -1){
+return;
+}
 
     for (var m = 0; m < CalipsoData[dateIndex].curtains.length; m++) {
 
