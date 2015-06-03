@@ -33,20 +33,20 @@ function readJSON(callback) {
 
 readJSON(function(responseText) {
     CalipsoData = JSON.parse(responseText);
-viewer.clock.startTime = Cesium.JulianDate.fromIso8601("2015-01-01"),
-    viewer.clock.currentTime = Cesium.JulianDate.fromIso8601("2015-01-02"),
-    viewer.clock.stopTime = Cesium.JulianDate.fromIso8601("2015-01-05"),
-    viewer.clock.clockRange = Cesium.ClockRange.LOOP_STOP,
-    viewer.clock.clockStep = Cesium.ClockStep.SYSTEM_CLOCK_MULTIPLIER
+    viewer.clock.startTime = Cesium.JulianDate.fromIso8601("2015-01-01"),
+        viewer.clock.currentTime = Cesium.JulianDate.fromIso8601("2015-01-02"),
+        viewer.clock.stopTime = Cesium.JulianDate.fromIso8601("2015-01-05"),
+        viewer.clock.clockRange = Cesium.ClockRange.LOOP_STOP,
+        viewer.clock.clockStep = Cesium.ClockStep.SYSTEM_CLOCK_MULTIPLIER
 
 
 
-viewer.timeline.updateFromClock();
-viewer.timeline.zoomTo(viewer.clock.startTime, viewer.clock.stopTime);
+    viewer.timeline.updateFromClock();
+    viewer.timeline.zoomTo(viewer.clock.startTime, viewer.clock.stopTime);
 
-        var gregorian = Cesium.JulianDate.toGregorianDate(viewer.clock.currentTime);
-        dateString = gregorian.year.toString() + "-" + (gregorian.month).toString() + "-" + gregorian.day.toString();
-        //console.log(dateString);
+    var gregorian = Cesium.JulianDate.toGregorianDate(viewer.clock.currentTime);
+    dateString = gregorian.year.toString() + "-" + (gregorian.month).toString() + "-" + gregorian.day.toString();
+    //console.log(dateString);
 
     visualize(dateString);
 
@@ -54,29 +54,29 @@ viewer.timeline.zoomTo(viewer.clock.startTime, viewer.clock.stopTime);
 
 
 function visualize(dateString) {
-   var trackColor, dateIndex = 0;
- viewer.entities.removeAll();
-console.log("In Visualize");
+    var trackColor, dateIndex = 0;
+    viewer.entities.removeAll();
+    console.log("In Visualize");
 
- //  console.log(CalipsoData.length);
+    //  console.log(CalipsoData.length);
 
-   for(var i = 0; i < CalipsoData.length;i++) {
-	//console.log(CalipsoData[i].date);
-	//console.log(dateString);
-	if(CalipsoData[i].date == dateString){
-		dateIndex = i;
-		console.log("dateIndex is set to");
-		console.log(dateIndex);
-		break;
-	} else {
-	dateIndex = -1;
-	}
-	
-   }
-//Data of selected date unavailable
-if(dateIndex == -1){
-return;
-}
+    for (var i = 0; i < CalipsoData.length; i++) {
+        //console.log(CalipsoData[i].date);
+        //console.log(dateString);
+        if (CalipsoData[i].date == dateString) {
+            dateIndex = i;
+            console.log("dateIndex is set to");
+            console.log(dateIndex);
+            break;
+        } else {
+            dateIndex = -1;
+        }
+
+    }
+    //Data of selected date unavailable
+    if (dateIndex == -1) {
+        return;
+    }
 
     for (var m = 0; m < CalipsoData[dateIndex].curtains.length; m++) {
 
@@ -97,13 +97,14 @@ return;
 
             viewer.entities.add({
                 name: '532nm Total Attenuated Backscatter',
-                id: 'D'+dateIndex+'C' + m + 'S' + i,
+                id: 'D' + dateIndex + 'C' + m + 'S' + i,
                 description: "Date : " + CalipsoData[dateIndex].date + "<br>Orbit : " + CalipsoData[dateIndex].curtains[m].orbit + "<br>Start Time (UTC) :  " + CalipsoData[dateIndex].curtains[m].sections[i].start_time + "<br>End Time (UTC) : " + CalipsoData[dateIndex].curtains[m].sections[i].end_time,
                 wall: {
                     positions: Cesium.Cartesian3.fromDegreesArray(coords),
                     maximumHeights: maxHts,
                     material: trackColor,
                     outline: true,
+                    outlineWidth: 1.0,
                     outlineColor: Cesium.Color.BLACK
                 }
             });
@@ -111,15 +112,19 @@ return;
         }
 
     }
-console.log("Visualization Done!");
+
+    //Code for highlighting markers and datacurtains on hover
+
+
+    console.log("Visualization Done!");
 }
 
-function pickEntity(viewer, windowPosition) {
+function pickEntityClick(viewer, windowPosition) {
     var picked = viewer.scene.pick(windowPosition);
     if (Cesium.defined(picked)) {
         var entityInstance = Cesium.defaultValue(picked.id, picked.primitive.id);
         if (entityInstance instanceof Cesium.Entity) {
-           // console.log(entityInstance.id);
+            // console.log(entityInstance.id);
             var numberPattern = /\d+/g;
             var indices = entityInstance.id.match(numberPattern);
 
@@ -132,6 +137,7 @@ function pickEntity(viewer, windowPosition) {
                 }
 
                 entityInstance.wall.outline = false;
+                //entityInstance.wall.outlineWidth = 3.0;
                 entityInstance.wall.maximumHeights = maxHts;
                 entityInstance.wall.material = CalipsoData[indices[0]].curtains[indices[1]].sections[indices[2]].img;
             } else {
@@ -149,6 +155,7 @@ function pickEntity(viewer, windowPosition) {
                 }
                 entityInstance.wall.maximumHeights = maxHts;
                 entityInstance.wall.outline = true;
+                entityInstance.wall.outlineWidth = 1.0;
                 entityInstance.wall.material = trackColor;
             }
         }
@@ -157,17 +164,88 @@ function pickEntity(viewer, windowPosition) {
     }
 };
 
+var tempEntity;
+
+
+function pickEntityHover(viewer, windowPosition) {
+    var picked = viewer.scene.pick(windowPosition);
+    var indices;
+    if (Cesium.defined(picked)) {
+        if (tempEntity) {
+            clearOnHoverOver(tempEntity);
+        }
+
+        var entityInstance = Cesium.defaultValue(picked.id, picked.primitive.id);
+        tempEntity = entityInstance;
+        if (entityInstance instanceof Cesium.Entity) {
+
+
+            var numberPattern = /\d+/g;
+            indices = entityInstance.id.match(numberPattern);
+
+            if (entityInstance.wall.outline._value == true) { //Marker
+
+                if (CalipsoData[indices[0]].curtains[indices[1]].orbit == "Day-Time") {
+                    trackColor = Cesium.Color.YELLOW;
+                } else {
+                    trackColor = Cesium.Color.GREEN;
+                }
+
+                entityInstance.wall.material = trackColor;
+
+
+            } else { //Data-Curtain
+                console.log("Data Curtain Hovered on");
+                // entityInstance.wall.material = Cesium.Color.WHITE;
+            }
+        }
+    } else {
+
+        clearOnHoverOver(tempEntity);
+
+    }
+};
+
+function clearOnHoverOver(tempEntity) {
+    var numberPattern = /\d+/g;
+    var indices = tempEntity.id.match(numberPattern);
+
+    //Marker or Data-Curtain
+
+    if (tempEntity.wall.outline._value == false) { //Data-Curtain
+
+    } else { //Marker
+
+        if (CalipsoData[indices[0]].curtains[indices[1]].orbit == "Day-Time") {
+            trackColor = Cesium.Color.RED;
+        } else {
+            trackColor = Cesium.Color.BLUE;
+        }
+        tempEntity.wall.material = trackColor;
+
+
+
+    }
+
+
+
+
+}
+
 var scene = viewer.scene;
 
 var ellipsoid = scene.globe.ellipsoid;
 handler = new Cesium.ScreenSpaceEventHandler(scene.canvas);
 handler.setInputAction(function(movement) {
     //console.log(curtain_entities);
-    pickEntity(viewer, movement.position);
+    pickEntityClick(viewer, movement.position);
 }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
 
-
-
+//Event Handler for Hover
+handler.setInputAction(function(movement) {
+    //console.log(curtain_entities);
+    pickEntityHover(viewer, movement.endPosition);
+}, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
 
 
 
@@ -179,8 +257,8 @@ function handleSetTime(e) {
         var gregorian = Cesium.JulianDate.toGregorianDate(julianDate);
         dateString = gregorian.year.toString() + "-" + (gregorian.month).toString() + "-" + gregorian.day.toString();
         console.log("Date set on the timeline to");
-	console.log(dateString);
-	visualize(dateString);
+        console.log(dateString);
+        visualize(dateString);
     }
 }
 
