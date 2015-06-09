@@ -254,6 +254,7 @@ var dateString;
 function handleSetTime(e) {
     if (Cesium.defined(viewer.timeline)) {
         var julianDate = e.timeJulian;
+	console.log(julianDate);
         var gregorian = Cesium.JulianDate.toGregorianDate(julianDate);
         dateString = gregorian.year.toString() + "-" + (gregorian.month).toString() + "-" + gregorian.day.toString();
         console.log("Date set on the timeline to");
