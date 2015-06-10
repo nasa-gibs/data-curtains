@@ -141,7 +141,7 @@ function visualize(dateString, time) {
             viewer.entities.getById(eId).wall.material = Cesium.Color.GREEN;
         }
 
-	eId = undefined;
+        eId = undefined;
 
     }
 }
@@ -204,9 +204,9 @@ function pickEntityClick(viewer, windowPosition) {
 
                 entityInstance.wall.outline = false;
                 entityInstance.wall.material = CalipsoData[indices[0]].curtains[indices[1]].sections[indices[2]].img;
-		var heading = Cesium.Math.toRadians(90);
-		var pitch = Cesium.Math.toRadians(-30);
-		viewer.flyTo(entityInstance, new Cesium.HeadingPitchRange(heading, pitch));
+                var heading = Cesium.Math.toRadians(90);
+                var pitch = Cesium.Math.toRadians(-30);
+                viewer.flyTo(entityInstance, new Cesium.HeadingPitchRange(heading, pitch));
 
             } else { // It is a Data Curtain, display Marker --Toggle
                 var coords = CalipsoData[indices[0]].curtains[indices[1]].sections[indices[2]].coordinates;
@@ -214,19 +214,41 @@ function pickEntityClick(viewer, windowPosition) {
                 for (var j = 0; j < (coords.length / 2); j++) {
                     maxHts[j] = 500000;
                 }
- 	  	setTimeout(function() {
-                if (CalipsoData[indices[0]].curtains[indices[1]].orbit == "Day-Time") {
-                    trackColor = Cesium.Color.RED;
-                } else {
-                    trackColor = Cesium.Color.BLUE;
-                }
-                entityInstance.wall.outline = true;
-                entityInstance.wall.material = trackColor;
+                setTimeout(function() {
+                    if (CalipsoData[indices[0]].curtains[indices[1]].orbit == "Day-Time") {
+                        trackColor = Cesium.Color.RED;
+                    } else {
+                        trackColor = Cesium.Color.BLUE;
+                    }
+                    entityInstance.wall.outline = true;
+                    entityInstance.wall.material = trackColor;
 
-		
-            }, 5);      
-  	}
-	entityInstance.wall.maximumHeights = maxHts;
+
+                    var destination = scene.camera.getRectangleCameraCoordinates(Cesium.Camera.DEFAULT_VIEW_RECTANGLE);
+
+                    var mag = Cesium.Cartesian3.magnitude(destination);
+                    mag += mag * Cesium.Camera.DEFAULT_VIEW_FACTOR;
+                    Cesium.Cartesian3.normalize(destination, destination);
+                    Cesium.Cartesian3.multiplyByScalar(destination, mag, destination);
+
+                    direction = Cesium.Cartesian3.normalize(destination, new Cesium.Cartesian3());
+                    Cesium.Cartesian3.negate(direction, direction);
+                    right = Cesium.Cartesian3.cross(direction, Cesium.Cartesian3.UNIT_Z, new Cesium.Cartesian3());
+                    up = Cesium.Cartesian3.cross(right, direction, new Cesium.Cartesian3());
+
+                    scene.camera.flyTo({
+                        destination: destination,
+                        orientation: {
+                            direction: direction,
+                            up: up
+                        },
+                        duration: 1.5,
+                        endTransform: Cesium.Matrix4.IDENTITY
+                    });
+
+                }, 5);
+            }
+            entityInstance.wall.maximumHeights = maxHts;
         }
     } else {
         console.log("undefined");
