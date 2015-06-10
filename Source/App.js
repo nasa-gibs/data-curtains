@@ -222,7 +222,7 @@ function pickEntityClick(viewer, windowPosition) {
                     entityInstance.wall.material = trackColor;
 		    curtainsVisible--;
 
-
+		    if(curtainsVisible == 0) {
                     var destination = scene.camera.getRectangleCameraCoordinates(Cesium.Camera.DEFAULT_VIEW_RECTANGLE);
 
                     var mag = Cesium.Cartesian3.magnitude(destination);
@@ -244,6 +244,7 @@ function pickEntityClick(viewer, windowPosition) {
                         duration: 1.5,
                         endTransform: Cesium.Matrix4.IDENTITY
                     });
+		}
 
                 }, 5);
             }
