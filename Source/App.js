@@ -141,6 +141,8 @@ function visualize(dateString, time) {
             viewer.entities.getById(eId).wall.material = Cesium.Color.GREEN;
         }
 
+	eId = undefined;
+
     }
 }
 
@@ -201,15 +203,18 @@ function pickEntityClick(viewer, windowPosition) {
                 }
 
                 entityInstance.wall.outline = false;
-
                 entityInstance.wall.material = CalipsoData[indices[0]].curtains[indices[1]].sections[indices[2]].img;
+		var heading = Cesium.Math.toRadians(90);
+		var pitch = Cesium.Math.toRadians(-30);
+		viewer.flyTo(entityInstance, new Cesium.HeadingPitchRange(heading, pitch));
+
             } else { // It is a Data Curtain, display Marker --Toggle
                 var coords = CalipsoData[indices[0]].curtains[indices[1]].sections[indices[2]].coordinates;
                 var maxHts = new Array(coords.length / 2);
                 for (var j = 0; j < (coords.length / 2); j++) {
                     maxHts[j] = 250000;
                 }
-
+ 	  	setTimeout(function() {
                 if (CalipsoData[indices[0]].curtains[indices[1]].orbit == "Day-Time") {
                     trackColor = Cesium.Color.RED;
                 } else {
@@ -217,10 +222,11 @@ function pickEntityClick(viewer, windowPosition) {
                 }
                 entityInstance.wall.outline = true;
                 entityInstance.wall.material = trackColor;
-            }
 
-            entityInstance.wall.maximumHeights = maxHts;
-
+		
+            }, 5);      
+  	}
+	entityInstance.wall.maximumHeights = maxHts;
         }
     } else {
         console.log("undefined");
