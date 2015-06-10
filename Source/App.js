@@ -102,7 +102,7 @@ function visualize(dateString, time) {
             var maxHts = new Array(coords.length / 2);
             //Populate MaxHts array
             for (var j = 0; j < coords.length / 2; j++) {
-                maxHts[j] = 250000;
+                maxHts[j] = 500000;
             }
 
             if (isMarkerTime(time, CalipsoData[dateIndex].curtains[m].sections[i].start_time, CalipsoData[dateIndex].curtains[m].sections[i].end_time)) {
@@ -133,7 +133,7 @@ function visualize(dateString, time) {
     if (typeof eId !== 'undefined') {
         var hts = viewer.entities.getById(eId).wall.maximumHeights._value;
         for (var x = 0; x < hts.length; x++)
-            hts[x] = 700000;
+            hts[x] = 800000;
         viewer.entities.getById(eId).wall.maximumHeights = hts;
         if (viewer.entities.getById(eId).wall.material._color._value.red == 1) {
             viewer.entities.getById(eId).wall.material = Cesium.Color.YELLOW;
@@ -212,7 +212,7 @@ function pickEntityClick(viewer, windowPosition) {
                 var coords = CalipsoData[indices[0]].curtains[indices[1]].sections[indices[2]].coordinates;
                 var maxHts = new Array(coords.length / 2);
                 for (var j = 0; j < (coords.length / 2); j++) {
-                    maxHts[j] = 250000;
+                    maxHts[j] = 500000;
                 }
  	  	setTimeout(function() {
                 if (CalipsoData[indices[0]].curtains[indices[1]].orbit == "Day-Time") {
