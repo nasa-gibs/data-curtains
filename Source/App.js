@@ -17,7 +17,7 @@ var viewer = new Cesium.Viewer("cesiumContainer", {
     //sceneMode : Cesium.SceneMode.COLUMBUS_VIEW
 });
 
-var CalipsoData, tempEntity, dateString, eId;
+var CalipsoData, tempEntity, dateString, eId, curtainsVisible = 0;
 var scene = viewer.scene;
 var ellipsoid = scene.globe.ellipsoid;
 handler = new Cesium.ScreenSpaceEventHandler(scene.canvas);
@@ -63,9 +63,7 @@ readJSON(function(responseText) {
 
 function visualize(dateString, time) {
 
-    console.log("In Vis");
-
-    var trackColor, dateIndex = 0;
+     var trackColor, dateIndex = 0;
 
 
     //Set the dateIndex to access the meta-data corresponding to the selected date
@@ -106,7 +104,6 @@ function visualize(dateString, time) {
             }
 
             if (isMarkerTime(time, CalipsoData[dateIndex].curtains[m].sections[i].start_time, CalipsoData[dateIndex].curtains[m].sections[i].end_time)) {
-                console.log("Matched Time");
                 eId = 'D' + dateIndex + 'C' + m + 'S' + i;
             }
 
@@ -126,8 +123,6 @@ function visualize(dateString, time) {
 
 
         }
-
-
 
     }
     if (typeof eId !== 'undefined') {
@@ -204,9 +199,12 @@ function pickEntityClick(viewer, windowPosition) {
 
                 entityInstance.wall.outline = false;
                 entityInstance.wall.material = CalipsoData[indices[0]].curtains[indices[1]].sections[indices[2]].img;
+		curtainsVisible++;
+		if(curtainsVisible==1) {
                 var heading = Cesium.Math.toRadians(90);
                 var pitch = Cesium.Math.toRadians(-30);
                 viewer.flyTo(entityInstance, new Cesium.HeadingPitchRange(heading, pitch));
+		}
 
             } else { // It is a Data Curtain, display Marker --Toggle
                 var coords = CalipsoData[indices[0]].curtains[indices[1]].sections[indices[2]].coordinates;
@@ -222,6 +220,7 @@ function pickEntityClick(viewer, windowPosition) {
                     }
                     entityInstance.wall.outline = true;
                     entityInstance.wall.material = trackColor;
+		    curtainsVisible--;
 
 
                     var destination = scene.camera.getRectangleCameraCoordinates(Cesium.Camera.DEFAULT_VIEW_RECTANGLE);
