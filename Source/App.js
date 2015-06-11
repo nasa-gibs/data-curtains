@@ -222,30 +222,6 @@ function pickEntityClick(viewer, windowPosition) {
                     entityInstance.wall.material = trackColor;
 		    curtainsVisible--;
 
-		    if(curtainsVisible == 0) {
-                    var destination = scene.camera.getRectangleCameraCoordinates(Cesium.Camera.DEFAULT_VIEW_RECTANGLE);
-
-                    var mag = Cesium.Cartesian3.magnitude(destination);
-                    mag += mag * Cesium.Camera.DEFAULT_VIEW_FACTOR;
-                    Cesium.Cartesian3.normalize(destination, destination);
-                    Cesium.Cartesian3.multiplyByScalar(destination, mag, destination);
-
-                    direction = Cesium.Cartesian3.normalize(destination, new Cesium.Cartesian3());
-                    Cesium.Cartesian3.negate(direction, direction);
-                    right = Cesium.Cartesian3.cross(direction, Cesium.Cartesian3.UNIT_Z, new Cesium.Cartesian3());
-                    up = Cesium.Cartesian3.cross(right, direction, new Cesium.Cartesian3());
-
-                    scene.camera.flyTo({
-                        destination: destination,
-                        orientation: {
-                            direction: direction,
-                            up: up
-                        },
-                        duration: 1.5,
-                        endTransform: Cesium.Matrix4.IDENTITY
-                    });
-		}
-
                 }, 5);
             }
             entityInstance.wall.maximumHeights = maxHts;
