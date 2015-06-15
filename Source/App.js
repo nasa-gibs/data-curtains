@@ -60,11 +60,11 @@ readJSON(function(responseText) {
 
 });
 
+var prevDateIndex = -1, firstVisualize = 0;
 
 function visualize(dateString, time) {
 
      var trackColor, dateIndex = 0;
-
 
     //Set the dateIndex to access the meta-data corresponding to the selected date
     for (var i = 0; i < CalipsoData.length; i++) {
@@ -75,15 +75,26 @@ function visualize(dateString, time) {
         } else {
             dateIndex = -1;
         }
-
-
     }
+
     console.log("Date Index = " + dateIndex);
     //Data of selected date unavailable
     if (dateIndex == -1) {
+    	viewer.entities.removeAll();
         return;
+    } else {
+    	if(firstVisualize = 0) {
+    		firstVisualize = 1;
+    		prevDateIndex = dateIndex;
+    	}
     }
-    viewer.entities.removeAll();
+    if(prevDateIndex!=dateIndex) {
+    	console.log("prevDateIndex != dateIndex, so removeAll")
+   		viewer.entities.removeAll();
+    } else {
+    	console.log("prevDateIndex = dateIndex, so not removeAll");
+    }
+
     //Only look for data of the selected date, hence CalipsoData[dateIndex]
     for (var m = 0; m < CalipsoData[dateIndex].curtains.length; m++) {
 
@@ -107,19 +118,22 @@ function visualize(dateString, time) {
                 eId = 'D' + dateIndex + 'C' + m + 'S' + i;
             }
 
-            viewer.entities.add({
-                name: '532nm Total Attenuated Backscatter',
-                id: 'D' + dateIndex + 'C' + m + 'S' + i,
-                description: "Date : " + CalipsoData[dateIndex].date + "<br>Orbit : " + CalipsoData[dateIndex].curtains[m].orbit + "<br>Start Time (UTC) :  " + CalipsoData[dateIndex].curtains[m].sections[i].start_time + "<br>End Time (UTC) : " + CalipsoData[dateIndex].curtains[m].sections[i].end_time,
-                wall: {
-                    positions: Cesium.Cartesian3.fromDegreesArray(coords),
-                    maximumHeights: maxHts,
-                    material: trackColor,
-                    outline: true,
-                    outlineWidth: 1.0,
-                    outlineColor: Cesium.Color.BLACK
-                }
-            });
+            if(prevDateIndex!=dateIndex) {
+            	console.log("prevDateIndex != dateIndex, so adding new entity")
+	            viewer.entities.add({
+	                name: '532nm Total Attenuated Backscatter',
+	                id: 'D' + dateIndex + 'C' + m + 'S' + i,
+	                description: "Date : " + CalipsoData[dateIndex].date + "<br>Orbit : " + CalipsoData[dateIndex].curtains[m].orbit + "<br>Start Time (UTC) :  " + CalipsoData[dateIndex].curtains[m].sections[i].start_time + "<br>End Time (UTC) : " + CalipsoData[dateIndex].curtains[m].sections[i].end_time,
+	                wall: {
+	                    positions: Cesium.Cartesian3.fromDegreesArray(coords),
+	                    maximumHeights: maxHts,
+	                    material: trackColor,
+	                    outline: true,
+	                    outlineWidth: 1.0,
+	                    outlineColor: Cesium.Color.BLACK
+	                }
+	            });
+	        }
 
 
         }
@@ -201,9 +215,15 @@ function pickEntityClick(viewer, windowPosition) {
                 entityInstance.wall.material = CalipsoData[indices[0]].curtains[indices[1]].sections[indices[2]].img;
 		curtainsVisible++;
 		if(curtainsVisible==1) {
-                var heading = Cesium.Math.toRadians(90);
-                var pitch = Cesium.Math.toRadians(-30);
-                viewer.flyTo(entityInstance, new Cesium.HeadingPitchRange(heading, pitch));
+var heading = Cesium.Math.toRadians(-180);
+var pitch = Cesium.Math.toRadians(0);
+                viewer.flyTo(entityInstance,new Cesium.HeadingPitchRange(heading, pitch));
+/*.then(function(result){
+  if (result) {
+   viewer.camera.rotateRight(1.57);
+  }
+});*/
+
 		}
 
             } else { // It is a Data Curtain, display Marker --Toggle
@@ -222,7 +242,7 @@ function pickEntityClick(viewer, windowPosition) {
                     entityInstance.wall.material = trackColor;
 		    curtainsVisible--;
 
-                }, 5);
+                }, 1);
             }
             entityInstance.wall.maximumHeights = maxHts;
         }
@@ -297,10 +317,8 @@ function handleSetTime(e) {
         var gregorian = Cesium.JulianDate.toGregorianDate(julianDate);
         //console.log(gregorian);
         dateString = gregorian.year.toString() + "-" + (gregorian.month).toString() + "-" + gregorian.day.toString();
-        viewer.entities.removeAll();
-        setTimeout(function() {
-            visualize(dateString, gregorian);
-        }, 5);
+        visualize(dateString, gregorian);
+
 
     }
 }
