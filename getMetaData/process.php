@@ -27,6 +27,7 @@ function queryECHO($url)
  
 $metadata = queryECHO("https://api.echo.nasa.gov/catalog-rest/echo_catalog/granules.json?echo_collection_id[]=C7299610-LARC_ASDC&temporal[]=".$sel_date."T00:00:00Z,".$sel_date."T23:59:59Z");
 
+echo "<h3>Calipso Meta-Data</h3>";
 echo "Selected Date: ".$sel_date."<br><br>";
 
 for ($i = 0; $i < count($metadata); $i++) {
