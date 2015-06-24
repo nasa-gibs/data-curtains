@@ -9,7 +9,7 @@
                         "section": 1,
                         "start_time": "00: 08: 17",
                         "end_time": "00: 21: 46",
-                        "img": "data/imagery/2015-01-01/test_1_1.png",
+                        "img": "data/imagery/2015-01-01/1_1.png",
                         "coordinates": [
                             8.57,
                             -61.83,
@@ -33,7 +33,7 @@
                         "section": 2,
                         "start_time": "00: 21: 47",
                         "end_time": "00: 35: 16",
-                        "img": "data/imagery/2015-01-01/test_1_2.png",
+                        "img": "data/imagery/2015-01-01/1_2.png",
                         "coordinates": [
                             -139.55,
                             -66.89,
@@ -57,7 +57,7 @@
                     },
                     {
                         "section": 3,
-                        "img": "data/imagery/2015-01-01/test_1_3.png",
+                        "img": "data/imagery/2015-01-01/1_3.png",
                         "start_time": "00: 35: 16",
                         "end_time": "00: 48: 45",
                         "coordinates": [
@@ -85,7 +85,7 @@
                         "section": 4,
                         "start_time": "00: 48: 46",
                         "end_time": "01: 00: 48",
-                        "img": "data/imagery/2015-01-01/test_1_4.png",
+                        "img": "data/imagery/2015-01-01/1_4.png",
                         "coordinates": [
                             -170.7,
                             29.79,
@@ -936,7 +936,7 @@
                         "section": 1,
                         "start_time": "00: 51: 33",
                         "end_time": "01: 05: 02",
-                        "img": "data/imagery/2015-01-02/test_2_1.png",
+                        "img": "data/imagery/2015-01-02/2_1.png",
                         "coordinates": [
 			    -2.30,	
                             -61.90,
@@ -962,7 +962,7 @@
                         "section": 2,
                         "start_time": "01: 05: 03",
                         "end_time": "01: 18: 31",
-                        "img": "data/imagery/2015-01-02/test_2_2.png",
+                        "img": "data/imagery/2015-01-02/2_2.png",
                         "coordinates": [
 			    -150.43,
                             -66.82,
@@ -987,7 +987,7 @@
                     },
                     {
                         "section": 3,
-                        "img": "data/imagery/2015-01-02/test_2_3.png",
+                        "img": "data/imagery/2015-01-02/2_3.png",
                         "start_time": "01: 18: 32",
                         "end_time": "01: 32: 01",
                         "coordinates": [
@@ -1015,7 +1015,7 @@
                         "section": 4,
                         "start_time": "01: 32: 01",
                         "end_time": "01: 44: 05",
-                        "img": "data/imagery/2015-01-02/test_2_4.png",
+                        "img": "data/imagery/2015-01-02/2_4.png",
                         "coordinates": [
                             178.47,
                            29.86,
