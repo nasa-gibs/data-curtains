@@ -1,8 +1,13 @@
 #!/usr/bin/env python
-
+import cgitb ; cgitb.enable()
+print "Content-type: text/html\n\n"
+print
+print """Script started!<br><br>"""
 import numpy as np
 import matplotlib as mpl
+mpl.use('Agg')
 import matplotlib.pyplot as plt
+import pylab
 from ccplot.hdf import HDF
 from ccplot.algorithms import interp2d_12
 import ccplot.utils
@@ -54,7 +59,8 @@ if __name__ == '__main__':
 
 	out_file = open("metadata.json","w")
 	json.dump(section,out_file, indent=4)
-	out_file.close()                                  
+	out_file.close()    
+	print """Generated meta-data.json<br>"""                              
 
         # Convert time to datetime.
         time = np.array([ccplot.utils.calipso_time2dt(t) for t in time])
@@ -82,7 +88,9 @@ if __name__ == '__main__':
         norm = mpl.colors.BoundaryNorm(cmap['bounds'], cm.N)
 
         # Plot figure.
+	pylab.plot([1,2,3])
         fig = plt.figure(figsize=(12, 6))
+
         im = plt.imshow(
             data.T,
             extent=(mpl.dates.date2num(time[0]), mpl.dates.date2num(time[-1]), h1, h2),
@@ -90,10 +98,12 @@ if __name__ == '__main__':
             norm=norm,
             aspect='auto',
             interpolation='nearest',
-        )
-
+       	 )
+	
 	ax=fig.add_subplot(1,1,1)
 	plt.axis('off')
 	extent = ax.get_window_extent().transformed(fig.dpi_scale_trans.inverted())
-	fig.savefig(outputFile, bbox_inches=extent)
+	fig.savefig(outputFile, bbox_inches=extent, format='png')
+
+	print """Generated 1.png<br>"""
 
