@@ -92,7 +92,12 @@ function cgi_getvars()
 }
 
 cgi_getvars BOTH ALL
+echo $date
+for file in ./CAL_LID_L1-ValStage1-V3-30.$date*
+do 
+  echo $file
+  python processHDF.py $file
+  #sleep 30
+done
 
-python processHDF.py $hdf
-
-echo "HDF File $hdf Processed Successfully!"
+echo "HDF Files Processed Successfully!"
