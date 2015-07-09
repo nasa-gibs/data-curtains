@@ -1,5 +1,7 @@
 #!/bin/bash
 
+HDF_DIR=$(dirname "$0")/hdf
+
 echo "Content-type: text/html"
 echo ""
 
@@ -93,7 +95,7 @@ function cgi_getvars()
 
 cgi_getvars BOTH ALL
 echo $date
-for file in ./CAL_LID_L1-ValStage1-V3-30.$date*
+for file in "$HDF_DIR"/CAL_LID_L1-ValStage1-V3-30.$date*
 do 
   echo $file
   python processHDF.py $file

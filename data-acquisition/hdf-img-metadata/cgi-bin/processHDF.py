@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import cgitb ; cgitb.enable()
+import cgitb
 #print "Content-type: text/html\n\n"
 #print
 #print """Script started!<br><br>"""
@@ -16,43 +16,46 @@ import json
 import re
 import os
 
+# Enable for debugging
+# cgitb.enable()
+
 #Set HDF File Name here
 filename = str(sys.argv[1]) #'CAL_LID_L1-ValStage1-V3-01.2007-06-12T03-42-18ZN.hdf'
-m = re.search('CAL_LID_L1-ValStage1-V3-30.(.+?)T', filename)
+m = re.search('CAL_LID_L1-ValStage1-V3-30.(.+?)T([0-9\-]+)', filename)
 if m:
     date = m.group(1)
+    time = m.group(2)
 name = 'Total_Attenuated_Backscatter_532'
 label = 'Total Attenuated Backscatter 532nm (km$^{-1}$ sr$^{-1}$)'
 colormap = '/usr/local/share/ccplot/cmap/calipso-backscatter.cmap'
-
+output_dir = os.path.join(os.path.dirname(__file__), "images")
+metadata_file = os.path.join(output_dir, 'metadata.json')
 
 if __name__ == '__main__':
     with HDF(filename) as product:
 	x1 = -1
 	h1 = 0  # km
 	h2 = 30  # km
-	nz = 600  
+	nz = 600
 
-	x2 = 0 
+	x2 = 0
 
 	i = -1
-	if not os.path.exists('./metadata.json'):
-		f = open('metadata.json','w')
+
+	if not os.path.exists(output_dir):
+		os.makedirs(output_dir)
+
+	if not os.path.exists(os.path.join(metadata_file)):
+		f = open(metadata_file, 'w')
 	else:
-		f = open('metadata.json','a')
+		f = open(metadata_file, 'a')
 	f.write('[\n')
 	f.close()
 	comma = ","
 
-	if not os.path.exists('./'+date):
-    		os.makedirs('./'+date)
-
-	if not os.path.exists('./'+date+'/1/'):
-    		os.makedirs('./'+date+'/1/')
-		path = './'+date+'/1/'
-	elif not os.path.exists('./'+date+'/2/'):
-		os.makedirs('./'+date+'/2/')
-		path = './'+date+'/2/'	
+	granule_dir = os.path.join(output_dir, date, time)
+	if not os.path.exists(granule_dir):
+		os.makedirs(granule_dir)
 
 	while (x2 != len(product['Profile_UTC_Time'][::]) - 1):
 
@@ -72,7 +75,7 @@ if __name__ == '__main__':
 			w = 3
 			h = 6
 			comma = ""
-		
+
 		# Import datasets.
 		time = product['Profile_UTC_Time'][x1:x2, 0]
 		height = product['metadata']['Lidar_Data_Altitudes']
@@ -89,11 +92,11 @@ if __name__ == '__main__':
 			latLon.append(float(product['Latitude'][index][0]))
 
 
-			
+
 
 		sections = []
-		outputFile = path+str(i)+'.png'
-		section = {                   
+		outputFile = os.path.join(granule_dir, str(i)+'.png')
+		section = {
 		  'start_time': str(product['Profile_UTC_Time'][x1][0]),
 		  'end_time': str(product['Profile_UTC_Time'][x2][0]),
 		  'orbit': orbitType,
@@ -101,11 +104,11 @@ if __name__ == '__main__':
 		  'coordinates': latLon
 		}
 
-		out_file = open("metadata.json","a")
+		out_file = open(metadata_file, "a")
 		json.dump(section,out_file, indent=4)
 		out_file.write(comma)
-		out_file.close()    
-		#print """Generated meta-data.json<br>"""                              
+		out_file.close()
+		#print """Generated meta-data.json<br>"""
 
 		# Convert time to datetime.
 		time = np.array([ccplot.utils.calipso_time2dt(t) for t in time])
@@ -144,7 +147,7 @@ if __name__ == '__main__':
 		    aspect='auto',
 		    interpolation='nearest',
 	       	 )
-	
+
 		ax=fig.add_subplot(1,1,1)
 		plt.axis('off')
 		extent = ax.get_window_extent().transformed(fig.dpi_scale_trans.inverted())
@@ -152,9 +155,9 @@ if __name__ == '__main__':
 
 		#print """Generated 1.png<br>"""
 
-	f = open('metadata.json','a')
+	f = open(metadata_file, 'a')
 	f.write('\n]\n')
 	f.close()
-		
-	
+
+
 
