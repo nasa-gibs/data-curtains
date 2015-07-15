@@ -98,7 +98,7 @@ echo $date
 for file in "$HDF_DIR"/CAL_LID_L1-ValStage1-V3-30.$date*
 do 
   echo $file
-  python processHDF.py $file
+  python extractImagery.py $file
   #sleep 30
 done
 
