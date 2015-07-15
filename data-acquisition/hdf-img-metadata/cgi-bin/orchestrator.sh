@@ -1,6 +1,6 @@
 #!/bin/bash
 
-HDF_DIR=$(dirname "$0")/hdf
+HDF_DIR=hdf
 
 echo "Content-type: text/html"
 echo ""
@@ -94,12 +94,35 @@ function cgi_getvars()
 }
 
 cgi_getvars BOTH ALL
-echo $date
-for file in "$HDF_DIR"/CAL_LID_L1-ValStage1-V3-30.$date*
-do 
-  echo $file
-  python extractImagery.py $file
-  #sleep 30
-done
+echo "Selected Date = "$date
 
-echo "HDF Files Processed Successfully!"
+i=0
+s1='img'
+s2='meta'
+if [ "$img" = "$s1" ]
+then
+	echo "Extracting Imagery..."
+	for file in "$HDF_DIR"/CAL_LID_L1-ValStage1-V3-30.$date*
+	do
+		python extractImagery.py $file
+	done
+else
+echo "Imagery Extraction Not Selected"
+fi
+
+if [ "$meta" = "$s2" ]
+then
+	echo "Extracting Metadata..."
+	for file in "$HDF_DIR"/CAL_LID_L1-ValStage1-V3-30.$date*
+	do
+		echo "$i"
+		hdfs["$i"]=$file
+		((i=i+1))
+		python extractImagery.py $file
+	done
+	python extractMetadata.py ${hdfs[@]}
+else
+echo "Metadata Extraction Not Selected"
+fi
+
+echo "Done!"
