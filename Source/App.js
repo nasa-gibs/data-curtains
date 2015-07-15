@@ -22,22 +22,20 @@ var scene = viewer.scene;
 var ellipsoid = scene.globe.ellipsoid;
 handler = new Cesium.ScreenSpaceEventHandler(scene.canvas);
 
-function readJSON(callback) {
+function readJSON(metadata_date,callback) {
     var xhttpObj = new XMLHttpRequest();
     xhttpObj.overrideMimeType("application/json");
-    xhttpObj.open('GET', 'data/metadata.json', true);
+    xhttpObj.open('GET', 'data/'+metadata_date+'.json', true);
     xhttpObj.onreadystatechange = function() {
         if (xhttpObj.readyState == 4 && xhttpObj.status == "200") {
             callback(xhttpObj.responseText);
         }
+	else {
+	    callback(null);
+	}
     };
     xhttpObj.send(null);
 }
-
-readJSON(function(responseText) {
-    //Read metadata.json
-    CalipsoData = JSON.parse(responseText);
-    //Set the Clock to Jan 01, 2015
     viewer.clock.startTime = Cesium.JulianDate.fromIso8601("2015-01-01"),
         viewer.clock.currentTime = Cesium.JulianDate.fromIso8601("2015-01-02"),
         viewer.clock.stopTime = Cesium.JulianDate.fromIso8601("2015-01-05"),
@@ -49,50 +47,36 @@ readJSON(function(responseText) {
     viewer.timeline.updateFromClock();
     viewer.timeline.zoomTo(viewer.clock.startTime, viewer.clock.stopTime);
 
-    //Get the default Date (Jan 01, 2015) in the required format
-    var gregorian = Cesium.JulianDate.toGregorianDate(viewer.clock.currentTime);
-    dateString = gregorian.year.toString() + "-" + (gregorian.month).toString() + "-" + gregorian.day.toString();
 
-    //Time Not Set initially
+
+var prevDate = -1, firstVisualize = 0;
+
+readJSON("2015-01-01",function(responseText) {
+    //Read metadata.json
+    CalipsoData = JSON.parse(responseText);
+    //Set the Clock to Jan 01, 2015
     var time = -1;
     //Generate the markers from the JSON
-    visualize(dateString, time);
+    visualize(CalipsoData, dateString, -1);
 
 });
 
-var prevDateIndex = -1, firstVisualize = 0;
+function visualize(CalipsoData, dateString, time) {
 
-function visualize(dateString, time) {
-
-     var trackColor, dateIndex = 0;
-
-    //Set the dateIndex to access the meta-data corresponding to the selected date
-    for (var i = 0; i < CalipsoData.length; i++) {
-
-        if (CalipsoData[i].date == dateString) {
-            dateIndex = i;
-            break;
-        } else {
-            dateIndex = -1;
-        }
-    }
-
-    console.log("Date Index = " + dateIndex);
+     var trackColor, dateIndex = 0;       
+	console.log(CalipsoData);
+    
     //Data of selected date unavailable
-    if (dateIndex == -1) {
+    if (CalipsoData == null) {
     	viewer.entities.removeAll();
+	prevDate = 0;
         return;
-    } else {
-    	if(firstVisualize = 0) {
-    		firstVisualize = 1;
-    		prevDateIndex = dateIndex;
-    	}
-    }
-    if(prevDateIndex!=dateIndex) {
-    	console.log("prevDateIndex != dateIndex, so removeAll")
+    } 
+
+    if(prevDate!=dateString) {
    		viewer.entities.removeAll();
     } else {
-    	console.log("prevDateIndex = dateIndex, so not removeAll");
+    	console.log("prevDate = dateString, so REUSE");
     }
 
     //Only look for data of the selected date, hence CalipsoData[dateIndex]
@@ -118,7 +102,7 @@ function visualize(dateString, time) {
                 eId = 'D' + dateIndex + 'C' + m + 'S' + i;
             }
 
-            if(prevDateIndex!=dateIndex) {
+            if(prevDate!=dateString) {
             	console.log("prevDateIndex != dateIndex, so adding new entity")
 	            viewer.entities.add({
 	                name: '532nm Total Attenuated Backscatter',
@@ -153,6 +137,7 @@ function visualize(dateString, time) {
         eId = undefined;
 
     }
+prevDate=dateString;
 }
 
 
@@ -198,7 +183,7 @@ function isMarkerTime(time, startTime, endTime) {
 
 function pickEntityClick(viewer, windowPosition) {
     var picked = viewer.scene.pick(windowPosition);
-    if (Cesium.defined(picked)) {
+    if (Cesium.defined(picked) && CalipsoData != null) {
         var entityInstance = Cesium.defaultValue(picked.id, picked.primitive.id);
         if (entityInstance instanceof Cesium.Entity) {
             var numberPattern = /\d+/g;
@@ -256,7 +241,7 @@ var pitch = Cesium.Math.toRadians(0);
 function pickEntityHover(viewer, windowPosition) {
     var picked = viewer.scene.pick(windowPosition);
     var indices;
-    if (Cesium.defined(picked)) {
+    if (Cesium.defined(picked) && CalipsoData != null) {
         if (typeof tempEntity !== 'undefined') {
             clearOnHoverOver(tempEntity);
         }
@@ -290,7 +275,7 @@ function pickEntityHover(viewer, windowPosition) {
 };
 
 function clearOnHoverOver(tempEntity) {
-    if (typeof tempEntity !== 'undefined') {
+    if (typeof tempEntity !== 'undefined' && CalipsoData != null) {
         var numberPattern = /\d+/g;
         var indices = tempEntity.id.match(numberPattern);
 
@@ -315,9 +300,26 @@ function handleSetTime(e) {
     if (Cesium.defined(viewer.timeline)) {
         var julianDate = e.timeJulian;
         var gregorian = Cesium.JulianDate.toGregorianDate(julianDate);
-        //console.log(gregorian);
-        dateString = gregorian.year.toString() + "-" + (gregorian.month).toString() + "-" + gregorian.day.toString();
-        visualize(dateString, gregorian);
+        console.log(gregorian);
+    if(gregorian.day<10)
+    dayString = "0"+gregorian.day.toString();
+    else
+    dayString = gregorian.day.toString();
+
+    if(gregorian.month<10)
+    monthString = "0"+gregorian.month.toString();
+    else
+    monthString = gregorian.month.toString();
+    dateString = gregorian.year.toString() + "-" + monthString + "-" + dayString;
+
+readJSON(dateString,function(responseText) {
+    //Read metadata.json
+    CalipsoData = JSON.parse(responseText);
+    
+    //Generate the markers from the JSON
+    visualize(CalipsoData, dateString, gregorian);
+
+});
 
 
     }
