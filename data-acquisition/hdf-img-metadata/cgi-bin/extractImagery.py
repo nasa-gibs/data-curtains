@@ -20,7 +20,7 @@ import os
 # cgitb.enable()
 
 #Set HDF File Name here
-filename = str(sys.argv[1]) #'CAL_LID_L1-ValStage1-V3-01.2007-06-12T03-42-18ZN.hdf'
+filename = str(sys.argv[1]) 
 m = re.search('CAL_LID_L1-ValStage1-V3-30.(.+?)T([0-9\-]+)', filename)
 if m:
     date = m.group(1)
@@ -29,7 +29,6 @@ name = 'Total_Attenuated_Backscatter_532'
 label = 'Total Attenuated Backscatter 532nm (km$^{-1}$ sr$^{-1}$)'
 colormap = '/usr/local/share/ccplot/cmap/calipso-backscatter.cmap'
 output_dir = os.path.join(os.path.dirname(__file__), "images")
-metadata_file = os.path.join(output_dir, 'metadata.json')
 
 if __name__ == '__main__':
     with HDF(filename) as product:
@@ -44,14 +43,6 @@ if __name__ == '__main__':
 
 	if not os.path.exists(output_dir):
 		os.makedirs(output_dir)
-
-	if not os.path.exists(os.path.join(metadata_file)):
-		f = open(metadata_file, 'w')
-	else:
-		f = open(metadata_file, 'a')
-	f.write('[\n')
-	f.close()
-	comma = ","
 
 	granule_dir = os.path.join(output_dir, date, time)
 	if not os.path.exists(granule_dir):
@@ -81,34 +72,7 @@ if __name__ == '__main__':
 		height = product['metadata']['Lidar_Data_Altitudes']
 		dataset = product[name][x1:x2]
 
-		def my_range(start, end, step):
-	    		while start <= end:
-				yield start
-				start += step
-
-		latLon = []
-		for index in my_range(x1, x2, 1000):
-	   		latLon.append(float(product['Longitude'][index][0]))
-			latLon.append(float(product['Latitude'][index][0]))
-
-
-
-
-		sections = []
 		outputFile = os.path.join(granule_dir, str(i)+'.png')
-		section = {
-		  'start_time': str(product['Profile_UTC_Time'][x1][0]),
-		  'end_time': str(product['Profile_UTC_Time'][x2][0]),
-		  'orbit': orbitType,
-		  'img': outputFile,
-		  'coordinates': latLon
-		}
-
-		out_file = open(metadata_file, "a")
-		json.dump(section,out_file, indent=4)
-		out_file.write(comma)
-		out_file.close()
-		#print """Generated meta-data.json<br>"""
 
 		# Convert time to datetime.
 		time = np.array([ccplot.utils.calipso_time2dt(t) for t in time])
@@ -154,10 +118,5 @@ if __name__ == '__main__':
 		fig.savefig(outputFile, bbox_inches=extent, format='png')
 
 		#print """Generated 1.png<br>"""
-
-	f = open(metadata_file, 'a')
-	f.write('\n]\n')
-	f.close()
-
 
 
