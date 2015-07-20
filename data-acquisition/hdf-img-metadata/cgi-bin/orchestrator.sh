@@ -99,7 +99,7 @@ echo "Selected Date = "$date
 i=0
 s1='img'
 s2='meta'
-if [ "$img" = "$s1" ]
+if [ "$img" = "$s1" ];
 then
 	echo "Extracting Imagery..."
 	for file in "$HDF_DIR"/CAL_LID_L1-ValStage1-V3-30.$date*
@@ -110,7 +110,7 @@ else
 echo "Imagery Extraction Not Selected"
 fi
 
-if [ "$meta" = "$s2" ]
+if [ "$meta" = "$s2" ];
 then
 	echo "Extracting Metadata..."
 	for file in "$HDF_DIR"/CAL_LID_L1-ValStage1-V3-30.$date*

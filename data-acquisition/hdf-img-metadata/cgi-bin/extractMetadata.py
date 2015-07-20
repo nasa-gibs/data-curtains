@@ -73,10 +73,10 @@ for x in range(1,len(sys.argv)):
 		if not os.path.exists(granule_dir):
 			os.makedirs(granule_dir)
 
+		time = product['Profile_UTC_Time'][0:len(product['Profile_UTC_Time'][::]), 0]
+		convertedTime = np.array([ccplot.utils.calipso_time2dt(t) for t in time])
 
 		while (x2 != len(product['Profile_UTC_Time'][::]) - 1):
-
-
 
 			i = i + 1
 			x1 = x2 + 1
@@ -89,7 +89,8 @@ for x in range(1,len(sys.argv)):
 			outputFile = os.path.join(granule_dir, str(i)+'.png')
 
 			# Import datasets.
-			time = product['Profile_UTC_Time'][x1:x2, 0]
+
+
 			height = product['metadata']['Lidar_Data_Altitudes']
 
 			def my_range(start, end, step):
@@ -106,9 +107,11 @@ for x in range(1,len(sys.argv)):
 
 
 			sections = []
+			st = convertedTime[x1].strftime('%H:%M:%S')
+			et = convertedTime[x2].strftime('%H:%M:%S')
 			section = {
-			  'start_time': str(product['Profile_UTC_Time'][x1][0]),
-			  'end_time': str(product['Profile_UTC_Time'][x2][0]),
+			  'start_time': str(st),
+			  'end_time': str(et),
 			  'img': outputFile,
 			  'coordinates': latLon
 			}
