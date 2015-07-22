@@ -70,18 +70,22 @@ function visualize(CalipsoData, dateString, time) {
     }
 
     var trackColor;
-
+  document.getElementById("pb_list").innerHTML = ""; 
     for (var m = 0; m < CalipsoData[0].curtains.length; m++) {
-
+console.log(CalipsoData[0].curtains.length);
         if (CalipsoData[0].curtains[m].orbit == "Day-Time") {
+ document.getElementById("pb_list").innerHTML += "<br><div id=pb_item>Orbit: Day-Time</div><br>"; 
             trackColor = Cesium.Color.RED;
         } else {
+ document.getElementById("pb_list").innerHTML += "<br><div id=pb_item>Orbit: Night-Time</div><br>"; 
             trackColor = Cesium.Color.BLUE;
         }
 
 
+
         for (var i = 0; i < CalipsoData[0].curtains[m].sections.length; i++) {
             var flag = 0;
+	    document.getElementById("pb_list").innerHTML += "<div id=pb_item>Section "+(i+1)+"</div>"; 
             var coords = CalipsoData[0].curtains[m].sections[i].coordinates;
             var maxHts = new Array(coords.length / 2);
             //Populate MaxHts array
@@ -159,7 +163,7 @@ function visualize(CalipsoData, dateString, time) {
         eId = undefined;
 
     }
-
+  document.getElementById("pb_list").innerHTML += "<br>";
     prevDate = dateString;
     firstVisualize = 1;
 }

@@ -7,12 +7,40 @@
       @import url(ThirdParty/Cesium-1.11/Widgets/widgets.css);
       html, body, #cesiumContainer {
           width: 100%; height: 100%; margin: 0; padding: 0; overflow: hidden;
+	  position:relative; z-index:-1;
       }
+
+#profileBrowser {
+position: absolute;
+z-index = 1;
+margin-top:15%;
+margin-left:80%;
+width: 18%;
+height: 60%;
+border: solid 2px #fff;
+border-radius: 5px;
+padding: 5px;
+padding-left:5px;
+color: #fff;
+overflow-y:scroll;
+overflow-x:hidden;
+}
+#pb_item, #pb_head {
+text-align:center;
+border: solid 2px #fff;
+border-radius: 5px;
+padding:5px;
+}
 
   </style>
 </head>
 <body>
+<div id = "profileBrowser">
+<div id="pb_head"><h3>Profile Browser</h3></div>
+<div id = "pb_list"></div>
+</div>
   <div id="cesiumContainer"></div>
+
   <script src="Source/App.js"></script>
 </body>
 </html>
