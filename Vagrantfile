@@ -11,6 +11,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.network "forwarded_port", guest: 80, host: 8888
 
   config.vm.provider "virtualbox" do |vb|
+      vb.memory = 2046
       vb.name = "data-curtains"
   end
 end

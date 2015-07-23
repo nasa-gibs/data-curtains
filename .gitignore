@@ -1,3 +1,6 @@
 .vagrant
 .DS_Store
 node_modules/
+data-acquisition/hdf-img-metadata/cgi-bin/hdf
+data-acquisition/hdf-img-metadata/cgi-bin/images
+
