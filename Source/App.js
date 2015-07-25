@@ -70,14 +70,14 @@ function visualize(CalipsoData, dateString, time) {
     }
 
     var trackColor;
-  document.getElementById("pb_list").innerHTML = ""; 
+  document.getElementById("pb_list_items").innerHTML = ""; 
     for (var m = 0; m < CalipsoData[0].curtains.length; m++) {
 console.log(CalipsoData[0].curtains.length);
         if (CalipsoData[0].curtains[m].orbit == "Day-Time") {
- document.getElementById("pb_list").innerHTML += "<br><div id=pb_item>Orbit: Day-Time</div><br>"; 
+ document.getElementById("pb_list_items").innerHTML += "<div id=pb_item>Orbit: Day-Time</div><br>"; 
             trackColor = Cesium.Color.RED;
         } else {
- document.getElementById("pb_list").innerHTML += "<br><div id=pb_item>Orbit: Night-Time</div><br>"; 
+ document.getElementById("pb_list_items").innerHTML += "<div id=pb_item>Orbit: Night-Time</div><br>"; 
             trackColor = Cesium.Color.BLUE;
         }
 
@@ -85,7 +85,7 @@ console.log(CalipsoData[0].curtains.length);
 
         for (var i = 0; i < CalipsoData[0].curtains[m].sections.length; i++) {
             var flag = 0;
-	    document.getElementById("pb_list").innerHTML += "<div id=pb_item>Section "+(i+1)+"</div>"; 
+	    document.getElementById("pb_list_items").innerHTML += "<div id=pb_item>Section "+(i+1)+"</div>"; 
             var coords = CalipsoData[0].curtains[m].sections[i].coordinates;
             var maxHts = new Array(coords.length / 2);
             //Populate MaxHts array
@@ -119,7 +119,7 @@ console.log(CalipsoData[0].curtains.length);
 
         }
 
-
+  document.getElementById("pb_list_items").innerHTML += "<br>";
 
     }
     if (prevEId != -1) {
@@ -163,7 +163,7 @@ console.log(CalipsoData[0].curtains.length);
         eId = undefined;
 
     }
-  document.getElementById("pb_list").innerHTML += "<br>";
+
     prevDate = dateString;
     firstVisualize = 1;
 }
