@@ -10,37 +10,91 @@
 	  position:relative; z-index:-1;
       }
 
-#profileBrowser {
-position: absolute;
-z-index = 1;
-margin-top:15%;
-margin-left:80%;
-width: 18%;
-height: 60%;
-border: solid 2px #fff;
-border-radius: 5px;
+#pb_head {
+text-align:center;
+border: 1px solid #333;
 padding: 5px;
-padding-left:5px;
+background: rgba(40, 40, 40, 0.85) none repeat scroll 0% 0%;
+border-top-left-radius:5px;
+border-top-right-radius:5px;
 color: #fff;
+padding:1px;
+font-family: "Lucida Sans",Arial,sans-serif;
+
+}
+#pb_list {
+margin-top:5px;
 overflow-y:scroll;
 overflow-x:hidden;
-}
-#pb_item, #pb_head {
 text-align:center;
-border: solid 2px #fff;
-border-radius: 5px;
-padding:5px;
-}
+border: 1px solid #333;
+padding: 5px;
+background: rgba(40, 40, 40, 0.85) none repeat scroll 0% 0%;
+border-bottom-left-radius:5px;
+border-bottom-right-radius:5px;
+color: #fff;
 
-  </style>
+height: 400px;
+max-height: 400px;
+}
+#pb_item {
+text-align:center;
+color:#fff;
+padding:5px;
+margin:1px;
+background: rgba(255, 255, 255, 0.2) none repeat scroll 0% 0%;
+}
+#pb_item_data{
+text-align:left;
+color:#999;
+padding:2px;
+margin:1px;
+background: rgba(255, 255, 255, 0.2) none repeat scroll 0% 0%;
+font: 100 13px/13px "Lucida Sans",Arial,sans-serif;
+}
+#pb_item_data:hover{
+/*
+border: 1px solid #fff;
+cursor: pointer;
+*/
+color:#000;
+background-color:#ccc;
+cursor: pointer;
+
+}
+#pb_item_clicked{
+text-align:left;
+color:#000;
+background-color:#ccc;
+cursor: pointer;
+padding:2px;
+font: 100 13px/13px "Lucida Sans",Arial,sans-serif;
+}
+#pb {
+margin-top:1%;
+margin-left:1%;
+position: absolute;
+z-index = 1;
+width: 21%;
+
+}
+img {
+   padding:1px;
+   border:1px solid #021a40;
+}
+/* Styles specific to this particular page */
+</style>
 </head>
 <body>
-<div id = "profileBrowser">
+<div id="pb">
 <div id="pb_head"><h3>Profile Browser</h3></div>
-<div id = "pb_list"></div>
+<div id = "pb_list" class="scroll-pane horizontal-only"><p><div id="pb_list_items"></div></p></div>
 </div>
+
   <div id="cesiumContainer"></div>
 
   <script src="Source/App.js"></script>
+
+
 </body>
 </html>
