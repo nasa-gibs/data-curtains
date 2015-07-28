@@ -381,6 +381,15 @@ entityInstance = viewer.entities.getById(name);
   var numberPattern = /\d+/g;
             var indices = name.match(numberPattern);
 
+var entity = new Cesium.Entity({name:"532nm Total Attenuated Backscatter"});
+entity.description = {
+    getValue : function() {
+        return "Date : " + CalipsoData[indices[0]].date + "<br>Orbit : " + CalipsoData[indices[0]].curtains[indices[1]].orbit + "<br>Start Time (UTC) :  " + CalipsoData[indices[0]].curtains[indices[1]].sections[indices[2]].start_time + "<br>End Time (UTC) : " + CalipsoData[indices[0]].curtains[indices[1]].sections[indices[2]].end_time;
+    }
+};
+viewer.selectedEntity = entity;
+
+
             if (entityInstance.wall.outline._value == true) { //It is a Marker, so display Data Curtain
 		document.getElementsByName(name)[0].id = "pb_item_clicked";
                 var coords = CalipsoData[indices[0]].curtains[indices[1]].sections[indices[2]].coordinates;
