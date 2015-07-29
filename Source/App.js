@@ -109,7 +109,7 @@ function visualize(CalipsoData, dateString, time) {
             if (isMarkerTime(time, CalipsoData[0].curtains[m].sections[i].start_time, CalipsoData[0].curtains[m].sections[i].end_time)) {
                 eId = 'D' + 0 + 'C' + m + 'S' + i;
             }
- 
+
             if (prevDate != dateString || firstVisualize == 0) {
                 viewer.entities.add({
                     name: '532nm Total Attenuated Backscatter',
@@ -342,9 +342,31 @@ function handleSetTime(e) {
         else
             monthString = gregorian.month.toString();
         dateString = gregorian.year.toString() + "-" + monthString + "-" + dayString;
-	if (prevDate != dateString) {
-	console.log("Code to Change Base Imagery goes here");
-	}
+        if (prevDate != dateString) {
+            console.log("Code to Change Base Imagery goes here");
+
+
+
+
+            layers.removeAll();
+
+            layers.addImageryProvider(new Cesium.WebMapTileServiceImageryProvider({
+
+                url: "http://map1.vis.earthdata.nasa.gov/wmts-webmerc/wmts.cgi?TIME=" + dateString, //Will require the date to be changed dynamically, from the Cesium Timeline Widget input.
+                layer: "MODIS_Aqua_CorrectedReflectance_TrueColor",
+                style: "",
+                format: "image/jpeg",
+                tileMatrixSetID: "GoogleMapsCompatible_Level9",
+                maximumLevel: 9,
+                tileWidth: 256,
+                tileHeight: 256,
+                tilingScheme: new Cesium.WebMercatorTilingScheme()
+
+
+            }));
+
+
+        }
 
         if (prevDate == dateString) {
             visualize(CalipsoData, dateString, gregorian);
@@ -358,7 +380,7 @@ function handleSetTime(e) {
             visualize(CalipsoData, dateString, gregorian);
 
         });
-	
+
 
     }
 }
