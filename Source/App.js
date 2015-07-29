@@ -18,6 +18,8 @@ var viewer = new Cesium.Viewer("cesiumContainer", {
     //sceneMode : Cesium.SceneMode.COLUMBUS_VIEW
 });
 
+var layers = viewer.scene.imageryLayers;
+
 var tempEntity, dateString, eId;
 var scene = viewer.scene;
 var ellipsoid = scene.globe.ellipsoid;
@@ -74,7 +76,6 @@ function visualize(CalipsoData, dateString, time) {
         document.getElementById("pb_list_items").innerHTML = "<div id=pb_item>Date: " + dateString + "</div><br>";
     }
     for (var m = 0; m < CalipsoData[0].curtains.length; m++) {
-        console.log(CalipsoData[0].curtains.length);
         if (CalipsoData[0].curtains[m].orbit == "Day-Time") {
             if (prevDate != dateString || firstVisualize == 0) {
                 document.getElementById("pb_list_items").innerHTML += "<div id=pb_item>Orbit: Day-Time</div><br>";
@@ -108,8 +109,7 @@ function visualize(CalipsoData, dateString, time) {
             if (isMarkerTime(time, CalipsoData[0].curtains[m].sections[i].start_time, CalipsoData[0].curtains[m].sections[i].end_time)) {
                 eId = 'D' + 0 + 'C' + m + 'S' + i;
             }
-            console.log(prevDate);
-            console.log(dateString);
+ 
             if (prevDate != dateString || firstVisualize == 0) {
                 viewer.entities.add({
                     name: '532nm Total Attenuated Backscatter',
@@ -156,11 +156,6 @@ function visualize(CalipsoData, dateString, time) {
     }
 
     if (typeof eId !== 'undefined') {
-        console.log(eId);
-        console.log(prevEId);
-
-
-
 
         var hts = viewer.entities.getById(eId).wall.maximumHeights._value;
         for (var x = 0; x < hts.length; x++)
@@ -333,6 +328,7 @@ function clearOnHoverOver(tempEntity) {
 
 function handleSetTime(e) {
     if (Cesium.defined(viewer.timeline)) {
+
         var julianDate = e.timeJulian;
         var gregorian = Cesium.JulianDate.toGregorianDate(julianDate);
 
@@ -346,6 +342,9 @@ function handleSetTime(e) {
         else
             monthString = gregorian.month.toString();
         dateString = gregorian.year.toString() + "-" + monthString + "-" + dayString;
+	if (prevDate != dateString) {
+	console.log("Code to Change Base Imagery goes here");
+	}
 
         if (prevDate == dateString) {
             visualize(CalipsoData, dateString, gregorian);
@@ -359,7 +358,7 @@ function handleSetTime(e) {
             visualize(CalipsoData, dateString, gregorian);
 
         });
-
+	
 
     }
 }
