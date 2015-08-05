@@ -76,14 +76,14 @@ function visualize(CalipsoData, dateString, time) {
         document.getElementById("pb_list_items").innerHTML = "<div id=pb_item>Date: " + dateString + "</div><br>";
     }
     for (var m = 0; m < CalipsoData[0].curtains.length; m++) {
-        if (CalipsoData[0].curtains[m].orbit == "Day-Time") {
+        if (CalipsoData[0].curtains[m].orbit == "Daytime") {
             if (prevDate != dateString || firstVisualize == 0) {
-                document.getElementById("pb_list_items").innerHTML += "<div id=pb_item>Orbit: Day-Time</div><br>";
+                document.getElementById("pb_list_items").innerHTML += "<div id=pb_item>Orbit: Daytime</div><br>";
             }
             trackColor = Cesium.Color.RED;
         } else {
             if (prevDate != dateString || firstVisualize == 0) {
-                document.getElementById("pb_list_items").innerHTML += "<div id=pb_item>Orbit: Night-Time</div><br>";
+                document.getElementById("pb_list_items").innerHTML += "<div id=pb_item>Orbit: Nighttime</div><br>";
             }
             trackColor = Cesium.Color.BLUE;
         }
@@ -140,7 +140,7 @@ function visualize(CalipsoData, dateString, time) {
             hts[x] = 500000;
         var numberPattern = /\d+/g;
         var indices = prevEId.match(numberPattern);
-        if (CalipsoData[0].curtains[indices[1]].orbit == "Day-Time") {
+        if (CalipsoData[0].curtains[indices[1]].orbit == "Daytime") {
             trackColor = Cesium.Color.RED;
         } else {
             trackColor = Cesium.Color.BLUE;
@@ -248,7 +248,7 @@ function pickEntityClick(viewer, windowPosition) {
                     maxHts[j] = 500000;
                 }
                 setTimeout(function() {
-                    if (CalipsoData[indices[0]].curtains[indices[1]].orbit == "Day-Time") {
+                    if (CalipsoData[indices[0]].curtains[indices[1]].orbit == "Daytime") {
                         trackColor = Cesium.Color.RED;
                     } else {
                         trackColor = Cesium.Color.BLUE;
@@ -286,7 +286,7 @@ function pickEntityHover(viewer, windowPosition) {
 
             if (entityInstance.wall.outline._value == true) { //Marker
 
-                if (CalipsoData[indices[0]].curtains[indices[1]].orbit == "Day-Time") {
+                if (CalipsoData[indices[0]].curtains[indices[1]].orbit == "Daytime") {
                     trackColor = Cesium.Color.YELLOW;
                 } else {
                     trackColor = Cesium.Color.GREEN;
@@ -315,7 +315,7 @@ function clearOnHoverOver(tempEntity) {
 
         } else { //Marker
 
-            if (CalipsoData[indices[0]].curtains[indices[1]].orbit == "Day-Time") {
+            if (CalipsoData[indices[0]].curtains[indices[1]].orbit == "Daytime") {
                 trackColor = Cesium.Color.RED;
             } else {
                 trackColor = Cesium.Color.BLUE;
@@ -393,7 +393,7 @@ function hoveredDiv(name) {
 
     if (entityInstance.wall.outline._value == true) { //Marker
 
-        if (CalipsoData[indices[0]].curtains[indices[1]].orbit == "Day-Time") {
+        if (CalipsoData[indices[0]].curtains[indices[1]].orbit == "Daytime") {
             trackColor = Cesium.Color.YELLOW;
         } else {
             trackColor = Cesium.Color.GREEN;
@@ -451,7 +451,7 @@ function clickedDiv(name) {
             maxHts[j] = 500000;
         }
         setTimeout(function() {
-            if (CalipsoData[indices[0]].curtains[indices[1]].orbit == "Day-Time") {
+            if (CalipsoData[indices[0]].curtains[indices[1]].orbit == "Daytime") {
                 trackColor = Cesium.Color.RED;
             } else {
                 trackColor = Cesium.Color.BLUE;
@@ -476,7 +476,7 @@ function leftDiv(name) {
 
     if (entityInstance.wall.outline._value == true) { //Marker
 
-        if (CalipsoData[indices[0]].curtains[indices[1]].orbit == "Day-Time") {
+        if (CalipsoData[indices[0]].curtains[indices[1]].orbit == "Daytime") {
             trackColor = Cesium.Color.RED;
         } else {
             trackColor = Cesium.Color.BLUE;

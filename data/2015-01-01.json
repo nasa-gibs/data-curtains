@@ -2,7 +2,7 @@
 {"date": "2015-01-01",
 "curtains": [
 {
-"orbit":"Nighttime",
+"orbit":"Daytime",
 "sections":[{
     "start_time": "00:08:17", 
     "coordinates": [
@@ -1320,7 +1320,7 @@
 }
 ]
 },{
-"orbit":"Daytime",
+"orbit":"Nighttime",
 "sections":[{
     "start_time": "01:00:49", 
     "coordinates": [
@@ -2482,7 +2482,7 @@
 }
 ]
 },{
-"orbit":"Nighttime",
+"orbit":"Daytime",
 "sections":[{
     "start_time": "01:47:10", 
     "coordinates": [
