@@ -302,8 +302,8 @@ function pickEntityHover(viewer, windowPosition) {
 	   altCoords.push(CalipsoData[0].curtains[indices[1]].sections[indices[2]].coordinates[0]);
 	   altCoords.push(CalipsoData[0].curtains[indices[1]].sections[indices[2]].coordinates[1]);
 
-	   altCoords.push(CalipsoData[0].curtains[indices[1]].sections[indices[2]].coordinates[0]-2);
-	   altCoords.push(CalipsoData[0].curtains[indices[1]].sections[indices[2]].coordinates[1]-2);
+	   altCoords.push(CalipsoData[0].curtains[indices[1]].sections[indices[2]].coordinates[12]);
+	   altCoords.push(CalipsoData[0].curtains[indices[1]].sections[indices[2]].coordinates[13]);
 		CalipsoData[0].curtains[indices[1]].sections[indices[2]].coordinates;
             var maxHts = new Array(altCoords.length / 2);
             //Populate MaxHts array
