@@ -297,9 +297,38 @@ function pickEntityHover(viewer, windowPosition) {
 
             } else { //Data-Curtain
 
+	   if(!(viewer.entities.getById('alt'))){
+           var altCoords = [];
+	   altCoords.push(CalipsoData[0].curtains[indices[1]].sections[indices[2]].coordinates[0]);
+	   altCoords.push(CalipsoData[0].curtains[indices[1]].sections[indices[2]].coordinates[1]);
+
+	   altCoords.push(CalipsoData[0].curtains[indices[1]].sections[indices[2]].coordinates[0]-2);
+	   altCoords.push(CalipsoData[0].curtains[indices[1]].sections[indices[2]].coordinates[1]-2);
+		CalipsoData[0].curtains[indices[1]].sections[indices[2]].coordinates;
+            var maxHts = new Array(altCoords.length / 2);
+            //Populate MaxHts array
+            for (var j = 0; j < altCoords.length / 2; j++) {
+                maxHts[j] = 2000000;
             }
-        }
+
+
+                viewer.entities.add({
+                    name: 'Atitude',
+                    id: 'alt',
+                    wall: {
+                        positions: Cesium.Cartesian3.fromDegreesArray(altCoords),
+                        maximumHeights: maxHts,
+                        material: 'images/test.png',
+                        outline: false
+                    }
+                });
+            }
+	}
+        } 
+	
     } else {
+	if(viewer.entities.getById('alt'))
+	viewer.entities.remove(viewer.entities.getById('alt'));
         clearOnHoverOver(tempEntity);
     }
 };
