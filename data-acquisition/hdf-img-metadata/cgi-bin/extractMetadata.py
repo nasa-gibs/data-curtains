@@ -53,9 +53,9 @@ for x in range(1,len(sys.argv)):
 	    with HDF(filename) as product:
 
 		if product['Day_Night_Flag'][0][0] == 1:
-			orbitType = 'Day-Time'
+			orbitType = 'Daytime'
 		else:
-			orbitType = 'Night-Time'
+			orbitType = 'Nighttime'
 
 		comma = ','
 

@@ -29,6 +29,34 @@ var prevDate = "2015-01-01",
     firstVisualize = 0;
 var CalipsoData, content;
 
+
+//Debugging code for checking flipping issue STARTS
+/*
+    var ellipsoid = scene.globe.ellipsoid;
+    var entity = viewer.entities.add({
+        label : {
+            show : false
+        }
+    });
+
+    // Mouse over the globe to see the cartographic position
+    handler = new Cesium.ScreenSpaceEventHandler(scene.canvas);
+    handler.setInputAction(function(movement) {
+        var cartesian = viewer.camera.pickEllipsoid(movement.endPosition, ellipsoid);
+        if (cartesian) {
+            var cartographic = ellipsoid.cartesianToCartographic(cartesian);
+            var longitudeString = Cesium.Math.toDegrees(cartographic.longitude).toFixed(2);
+            var latitudeString = Cesium.Math.toDegrees(cartographic.latitude).toFixed(2);
+
+            entity.position = cartesian;
+            entity.label.show = true;
+            entity.label.text = '(' + longitudeString + ', ' + latitudeString + ')';
+        } else {
+            entity.label.show = false;
+        }
+    }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
+*/
+//Debugging code for checking flipping issue ENDS
 function readJSON(metadata_date, callback) {
     var xhttpObj = new XMLHttpRequest();
     xhttpObj.overrideMimeType("application/json");
@@ -76,14 +104,14 @@ function visualize(CalipsoData, dateString, time) {
         document.getElementById("pb_list_items").innerHTML = "<div id=pb_item>Date: " + dateString + "</div><br>";
     }
     for (var m = 0; m < CalipsoData[0].curtains.length; m++) {
-        if (CalipsoData[0].curtains[m].orbit == "Day-Time") {
+        if (CalipsoData[0].curtains[m].orbit == "Daytime") {
             if (prevDate != dateString || firstVisualize == 0) {
-                document.getElementById("pb_list_items").innerHTML += "<div id=pb_item>Orbit: Day-Time</div><br>";
+                document.getElementById("pb_list_items").innerHTML += "<div id=pb_item>Orbit: Daytime</div><br>";
             }
             trackColor = Cesium.Color.RED;
         } else {
             if (prevDate != dateString || firstVisualize == 0) {
-                document.getElementById("pb_list_items").innerHTML += "<div id=pb_item>Orbit: Night-Time</div><br>";
+                document.getElementById("pb_list_items").innerHTML += "<div id=pb_item>Orbit: Nighttime</div><br>";
             }
             trackColor = Cesium.Color.BLUE;
         }
@@ -100,9 +128,9 @@ function visualize(CalipsoData, dateString, time) {
             }
             //document.getElementById("pb_list_items").innerHTML += "<div id=pb_item>Section "+(i+1)+"</div>"; 
             var coords = CalipsoData[0].curtains[m].sections[i].coordinates;
-            var maxHts = new Array(coords.length / 2);
+            var maxHts = new Array(2);
             //Populate MaxHts array
-            for (var j = 0; j < coords.length / 2; j++) {
+            for (var j = 0; j < 2; j++) {
                 maxHts[j] = 500000;
             }
 
@@ -116,8 +144,8 @@ function visualize(CalipsoData, dateString, time) {
                     id: 'D' + 0 + 'C' + m + 'S' + i,
                     description: "Date : " + CalipsoData[0].date + "<br>Orbit : " + CalipsoData[0].curtains[m].orbit + "<br>Start Time (UTC) :  " + CalipsoData[0].curtains[m].sections[i].start_time + "<br>End Time (UTC) : " + CalipsoData[0].curtains[m].sections[i].end_time,
                     wall: {
-                        positions: Cesium.Cartesian3.fromDegreesArray(coords),
-                        maximumHeights: maxHts,
+                        positions: Cesium.Cartesian3.fromDegreesArray([coords[0],coords[1],coords[coords.length - 2], coords[coords.length -1]]),
+                        maximumHeights: [500000,500000],
                         material: trackColor,
                         outline: true,
                         outlineWidth: 1.0,
@@ -140,7 +168,7 @@ function visualize(CalipsoData, dateString, time) {
             hts[x] = 500000;
         var numberPattern = /\d+/g;
         var indices = prevEId.match(numberPattern);
-        if (CalipsoData[0].curtains[indices[1]].orbit == "Day-Time") {
+        if (CalipsoData[0].curtains[indices[1]].orbit == "Daytime") {
             trackColor = Cesium.Color.RED;
         } else {
             trackColor = Cesium.Color.BLUE;
@@ -225,17 +253,24 @@ function pickEntityClick(viewer, windowPosition) {
             if (entityInstance.wall.outline._value == true) { //It is a Marker, so display Data Curtain
                 document.getElementsByName(entityInstance.id)[0].id = "pb_item_clicked";
                 var coords = CalipsoData[indices[0]].curtains[indices[1]].sections[indices[2]].coordinates;
-                var maxHts = new Array(coords.length / 2);
-                for (var j = 0; j < (coords.length / 2); j++) {
+                var maxHts = new Array(2);
+                for (var j = 0; j < (2); j++) {
                     maxHts[j] = 2000000;
                 }
 
                 entityInstance.wall.outline = false;
                 entityInstance.wall.material = CalipsoData[indices[0]].curtains[indices[1]].sections[indices[2]].img;
 
-                var heading = Cesium.Math.toRadians(-180);
-                var pitch = Cesium.Math.toRadians(0);
-                viewer.flyTo(entityInstance, new Cesium.HeadingPitchRange(heading, pitch));
+   var halfLon = (coords.length)/2;
+var halfLat = (coords.length)/2+1;
+
+viewer.camera.setView({
+    position : Cesium.Cartesian3.fromDegrees(CalipsoData[indices[0]].curtains[indices[1]].sections[indices[2]].coordinates[halfLon], CalipsoData[indices[0]].curtains[indices[1]].sections[indices[2]].coordinates[halfLat], 50000.0),
+    heading : Cesium.Math.toRadians(90.0), // east, default value is 0.0 (north)
+    pitch : Cesium.Math.toRadians(-45),    // default value (looking down)
+    roll : 0.0                             // default value
+});
+viewer.camera.zoomOut(10000000);
 
 
 
@@ -243,12 +278,12 @@ function pickEntityClick(viewer, windowPosition) {
             } else { // It is a Data Curtain, display Marker --Toggle
                 document.getElementsByName(entityInstance.id)[0].id = "pb_item_data";
                 var coords = CalipsoData[indices[0]].curtains[indices[1]].sections[indices[2]].coordinates;
-                var maxHts = new Array(coords.length / 2);
-                for (var j = 0; j < (coords.length / 2); j++) {
+                var maxHts = new Array(2);
+                for (var j = 0; j < (2); j++) {
                     maxHts[j] = 500000;
                 }
                 setTimeout(function() {
-                    if (CalipsoData[indices[0]].curtains[indices[1]].orbit == "Day-Time") {
+                    if (CalipsoData[indices[0]].curtains[indices[1]].orbit == "Daytime") {
                         trackColor = Cesium.Color.RED;
                     } else {
                         trackColor = Cesium.Color.BLUE;
@@ -286,7 +321,7 @@ function pickEntityHover(viewer, windowPosition) {
 
             if (entityInstance.wall.outline._value == true) { //Marker
 
-                if (CalipsoData[indices[0]].curtains[indices[1]].orbit == "Day-Time") {
+                if (CalipsoData[indices[0]].curtains[indices[1]].orbit == "Daytime") {
                     trackColor = Cesium.Color.YELLOW;
                 } else {
                     trackColor = Cesium.Color.GREEN;
@@ -297,9 +332,38 @@ function pickEntityHover(viewer, windowPosition) {
 
             } else { //Data-Curtain
 
+	   if(!(viewer.entities.getById('alt'))){
+           var altCoords = [];
+	   altCoords.push(CalipsoData[0].curtains[indices[1]].sections[indices[2]].coordinates[0]);
+	   altCoords.push(CalipsoData[0].curtains[indices[1]].sections[indices[2]].coordinates[1]);
+
+	   altCoords.push(CalipsoData[0].curtains[indices[1]].sections[indices[2]].coordinates[12]);
+	   altCoords.push(CalipsoData[0].curtains[indices[1]].sections[indices[2]].coordinates[13]);
+		CalipsoData[0].curtains[indices[1]].sections[indices[2]].coordinates;
+            var maxHts = new Array(altCoords.length / 2);
+            //Populate MaxHts array
+            for (var j = 0; j < altCoords.length / 2; j++) {
+                maxHts[j] = 2000000;
             }
-        }
+
+
+                viewer.entities.add({
+                    name: 'Atitude',
+                    id: 'alt',
+                    wall: {
+                        positions: Cesium.Cartesian3.fromDegreesArray(altCoords),
+                        maximumHeights: maxHts,
+                        material: 'images/test.png',
+                        outline: false
+                    }
+                });
+            }
+	}
+        } 
+	
     } else {
+	if(viewer.entities.getById('alt'))
+	viewer.entities.remove(viewer.entities.getById('alt'));
         clearOnHoverOver(tempEntity);
     }
 };
@@ -315,7 +379,7 @@ function clearOnHoverOver(tempEntity) {
 
         } else { //Marker
 
-            if (CalipsoData[indices[0]].curtains[indices[1]].orbit == "Day-Time") {
+            if (CalipsoData[indices[0]].curtains[indices[1]].orbit == "Daytime") {
                 trackColor = Cesium.Color.RED;
             } else {
                 trackColor = Cesium.Color.BLUE;
@@ -345,6 +409,27 @@ function handleSetTime(e) {
         if (prevDate != dateString) {
             console.log("Code to Change Base Imagery goes here");
 
+		var destination = scene.camera.getRectangleCameraCoordinates(Cesium.Camera.DEFAULT_VIEW_RECTANGLE);
+
+                    var mag = Cesium.Cartesian3.magnitude(destination);
+                    mag += mag * Cesium.Camera.DEFAULT_VIEW_FACTOR;
+                    Cesium.Cartesian3.normalize(destination, destination);
+                    Cesium.Cartesian3.multiplyByScalar(destination, mag, destination);
+
+                    direction = Cesium.Cartesian3.normalize(destination, new Cesium.Cartesian3());
+                    Cesium.Cartesian3.negate(direction, direction);
+                    right = Cesium.Cartesian3.cross(direction, Cesium.Cartesian3.UNIT_Z, new Cesium.Cartesian3());
+                    up = Cesium.Cartesian3.cross(right, direction, new Cesium.Cartesian3());
+
+                    scene.camera.flyTo({
+                        destination: destination,
+                        orientation: {
+                            direction: direction,
+                            up: up
+                        },
+                        duration: 1.5,
+                        endTransform: Cesium.Matrix4.IDENTITY
+                    });
 
 
 
@@ -393,7 +478,7 @@ function hoveredDiv(name) {
 
     if (entityInstance.wall.outline._value == true) { //Marker
 
-        if (CalipsoData[indices[0]].curtains[indices[1]].orbit == "Day-Time") {
+        if (CalipsoData[indices[0]].curtains[indices[1]].orbit == "Daytime") {
             trackColor = Cesium.Color.YELLOW;
         } else {
             trackColor = Cesium.Color.GREEN;
@@ -408,11 +493,12 @@ function hoveredDiv(name) {
 }
 
 function clickedDiv(name) {
+
     entityInstance = viewer.entities.getById(name);
 
     var numberPattern = /\d+/g;
     var indices = name.match(numberPattern);
-
+    if(CalipsoData[indices[0]].curtains[indices[1]]) {
     var entity = new Cesium.Entity({
         name: "532nm Total Attenuated Backscatter"
     });
@@ -427,31 +513,37 @@ function clickedDiv(name) {
     if (entityInstance.wall.outline._value == true) { //It is a Marker, so display Data Curtain
         document.getElementsByName(name)[0].id = "pb_item_clicked";
         var coords = CalipsoData[indices[0]].curtains[indices[1]].sections[indices[2]].coordinates;
-        var maxHts = new Array(coords.length / 2);
-        for (var j = 0; j < (coords.length / 2); j++) {
+        var maxHts = new Array(2);
+        for (var j = 0; j < 2; j++) {
             maxHts[j] = 2000000;
         }
 
         entityInstance.wall.outline = false;
         entityInstance.wall.material = CalipsoData[indices[0]].curtains[indices[1]].sections[indices[2]].img;
+	
+	
 
-        var heading = Cesium.Math.toRadians(-180);
-        var pitch = Cesium.Math.toRadians(0);
-        viewer.flyTo(entityInstance, new Cesium.HeadingPitchRange(heading, pitch));
+var halfLon = (coords.length)/2;
+var halfLat = (coords.length)/2+1;
 
-
-
+viewer.camera.setView({
+    position : Cesium.Cartesian3.fromDegrees(CalipsoData[indices[0]].curtains[indices[1]].sections[indices[2]].coordinates[halfLon], CalipsoData[indices[0]].curtains[indices[1]].sections[indices[2]].coordinates[halfLat], 50000.0),
+    heading : Cesium.Math.toRadians(90.0), // east, default value is 0.0 (north)
+    pitch : Cesium.Math.toRadians(-45),    // default value (looking down)
+    roll : 0.0                             // default value
+});
+viewer.camera.zoomOut(10000000);
 
     } else {
         // It is a Data Curtain, display Marker --Toggle
         document.getElementsByName(name)[0].id = "pb_item_data";
         var coords = CalipsoData[indices[0]].curtains[indices[1]].sections[indices[2]].coordinates;
-        var maxHts = new Array(coords.length / 2);
-        for (var j = 0; j < (coords.length / 2); j++) {
+        var maxHts = new Array(2);
+        for (var j = 0; j < (2); j++) {
             maxHts[j] = 500000;
         }
         setTimeout(function() {
-            if (CalipsoData[indices[0]].curtains[indices[1]].orbit == "Day-Time") {
+            if (CalipsoData[indices[0]].curtains[indices[1]].orbit == "Daytime") {
                 trackColor = Cesium.Color.RED;
             } else {
                 trackColor = Cesium.Color.BLUE;
@@ -464,7 +556,7 @@ function clickedDiv(name) {
     }
     entityInstance.wall.maximumHeights = maxHts;
 
-
+}
 }
 
 function leftDiv(name) {
@@ -476,7 +568,7 @@ function leftDiv(name) {
 
     if (entityInstance.wall.outline._value == true) { //Marker
 
-        if (CalipsoData[indices[0]].curtains[indices[1]].orbit == "Day-Time") {
+        if (CalipsoData[indices[0]].curtains[indices[1]].orbit == "Daytime") {
             trackColor = Cesium.Color.RED;
         } else {
             trackColor = Cesium.Color.BLUE;
@@ -495,6 +587,7 @@ handler.setInputAction(function(movement) {
 }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
 
 //Event Handler for Hover
+
 handler.setInputAction(function(movement) {
     pickEntityHover(viewer, movement.endPosition);
 }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);

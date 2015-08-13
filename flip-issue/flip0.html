@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>GSOC: NASA's Data Curtains from Space</title>
+  <script src="../ThirdParty/Cesium-1.11/Cesium.js"></script>
+  <style>
+      @import url(../ThirdParty/Cesium-1.11/Widgets/widgets.css);
+      html, body, #cesiumContainer {
+          width: 100%; height: 100%; margin: 0; padding: 0; overflow: hidden;
+      }
+  </style>
+</head>
+<body>
+  <div id="cesiumContainer"></div>
+  <script>
+    var viewer = new Cesium.Viewer('cesiumContainer');
+
+var scene = viewer.scene;
+var handler;
+
+
+    var ellipsoid = scene.globe.ellipsoid;
+    var entity = viewer.entities.add({
+        label : {
+            show : false
+        }
+    });
+
+    // Mouse over the globe to see the cartographic position
+    handler = new Cesium.ScreenSpaceEventHandler(scene.canvas);
+    handler.setInputAction(function(movement) {
+        var cartesian = viewer.camera.pickEllipsoid(movement.endPosition, ellipsoid);
+        if (cartesian) {
+            var cartographic = ellipsoid.cartesianToCartographic(cartesian);
+            var longitudeString = Cesium.Math.toDegrees(cartographic.longitude).toFixed(2);
+            var latitudeString = Cesium.Math.toDegrees(cartographic.latitude).toFixed(2);
+
+            entity.position = cartesian;
+            entity.label.show = true;
+            entity.label.text = '(' + longitudeString + ', ' + latitudeString + ')';
+        } else {
+            entity.label.show = false;
+        }
+    }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
+
+
+
+/*
+* Actual Image: https://raw.githubusercontent.com/abhishekvp/data-curtains/gh-pages/data/imagery/2015-01-02/test_2_3.png
+*
+*/
+var coords = [-164.55555725097656, 
+        2.952378511428833, 
+ 
+       
+  
+
+
+  
+        -171.4447021484375, 
+        32.56910705566406 ];
+
+
+	var maxHts=[];
+        for (var j = 0; j < (coords.length / 2); j++) {
+            maxHts[j] = 500000;
+        }
+
+//Image being displayed correctly
+ viewer.entities.add({
+	                name: 'Image being display correctly',
+	                wall: {
+	                    positions: Cesium.Cartesian3.fromDegreesArray(coords),
+maximumHeights : maxHts,
+	                    material: "https://raw.githubusercontent.com/abhishekvp/data-curtains/gh-pages/data/imagery/2015-01-02/test_2_3.png",
+	                    outline: true,
+	                    outlineWidth: 1.0,
+	                    outlineColor: Cesium.Color.BLACK
+	                }
+	            });
+                        /*
+//Image being flipped as the longitude crosses 180
+  viewer.entities.add({
+	                name: 'Image being flipped as the longitude crosses 180',
+      wall: {
+	                    positions: Cesium.Cartesian3.fromDegreesArray([ -170.59,-18.99, 179.96, -18.99]),
+	                    maximumHeights: [500000,500000],
+	                    material: "https://raw.githubusercontent.com/abhishekvp/data-curtains/gh-pages/data/imagery/2015-01-02/test_2_3.png",
+	                    outline: true,
+	                    outlineWidth: 1.0,
+	                    outlineColor: Cesium.Color.BLACK
+	                }
+	            });*/
+ viewer.zoomTo(viewer.entities);
+  </script>
+</body>
+</html>
+
