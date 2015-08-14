@@ -52,7 +52,7 @@ for x in range(1,len(sys.argv)):
 	if __name__ == '__main__':
 	    with HDF(filename) as product:
 
-		if product['Day_Night_Flag'][0][0] == 1:
+		if product['Day_Night_Flag'][0][0] == 0:
 			orbitType = 'Daytime'
 		else:
 			orbitType = 'Nighttime'
