@@ -101,7 +101,7 @@ i=0
 #s2='meta'
 #if [ "$img" = "$s1" ];
 #then
-echo "Extracting Imagery..."
+echo "Extracted Imagery..."
 for file in "$HDF_DIR"/CAL_LID_L1-ValStage1-V3-30.$date*
 do
 	python extractImagery.py $file
@@ -112,7 +112,7 @@ done
 
 #if [ "$meta" = "$s2" ];
 #then
-echo "Extracting Metadata..."
+echo "Extracted Metadata"
 for file in "$HDF_DIR"/CAL_LID_L1-ValStage1-V3-30.$date*
 do
 #		echo "$i"
@@ -123,7 +123,7 @@ done
 
 	python extractMetadata.py ${hdfs[@]}
 #else
-echo "Metadata Extraction Not Selected"
+#echo "Metadata Extraction Not Selected"
 #fi
 
 #echo "Done!"

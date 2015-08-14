@@ -27,8 +27,10 @@ m = re.search('CAL_LID_L1-ValStage1-V3-30.(.+?)T([0-9\-]+)', filename)
 if m:
 	date = m.group(1)
 
-output_dir = os.path.join(os.path.dirname(__file__))
-metadata_file = os.path.join(output_dir, date+'.json')
+if not os.path.exists('meta-data'):
+    os.makedirs('meta-data')
+metadata_dir = os.path.join(os.path.dirname(__file__), "meta-data")
+metadata_file = os.path.join(metadata_dir, date+'.json')
 
 f = open(metadata_file, 'w')
 f.write('[\n{\"date\": \"'+date+'\",\n\"curtains\": [\n')
