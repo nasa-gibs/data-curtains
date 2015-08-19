@@ -1,6 +1,6 @@
 #!/bin/bash
 
-HDF_DIR=hdf
+HDF_DIR="hdf"
 
 echo "Content-type: text/html"
 echo ""

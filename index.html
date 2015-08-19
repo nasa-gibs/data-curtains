@@ -18,7 +18,19 @@ background: rgba(40, 40, 40, 0.85) none repeat scroll 0% 0%;
 border-top-left-radius:5px;
 border-top-right-radius:5px;
 color: #fff;
-padding:1px;
+
+font-family: "Lucida Sans",Arial,sans-serif;
+
+}
+#pb_toggle {
+text-align:center;
+border: 1px solid #333;
+padding: 5px;
+background: rgba(40, 40, 40, 0.85) none repeat scroll 0% 0%;
+border-bottom-left-radius:5px;
+border-bottom-right-radius:5px;
+color: #fff;
+margin-top:5px;
 font-family: "Lucida Sans",Arial,sans-serif;
 
 }
@@ -30,8 +42,7 @@ text-align:center;
 border: 1px solid #333;
 padding: 5px;
 background: rgba(40, 40, 40, 0.85) none repeat scroll 0% 0%;
-border-bottom-left-radius:5px;
-border-bottom-right-radius:5px;
+
 color: #fff;
 
 height: 400px;
@@ -79,6 +90,9 @@ z-index = 1;
 width: 21%;
 
 }
+#myButton {
+width:100%;
+}
 img {
    padding:1px;
    border:1px solid #021a40;
@@ -90,6 +104,9 @@ img {
 <div id="pb">
 <div id="pb_head"><h3>Profile Browser</h3></div>
 <div id = "pb_list" class="scroll-pane horizontal-only"><p><div id="pb_list_items"></div></p></div>
+
+<div id="pb_toggle"><input id ="myButton" style="border-bottom-left-radius:5px;
+border-bottom-right-radius:5px;" type="button" value="Toggle Orbital Tracks" onClick="toggleMarkers();"/></div>
 </div>
 
   <div id="cesiumContainer"></div>
