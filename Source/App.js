@@ -27,7 +27,7 @@ handler = new Cesium.ScreenSpaceEventHandler(scene.canvas);
 var prevDate = "2015-01-01",
     prevEId = -1,
     firstVisualize = 0;
-var CalipsoData, content;
+var CalipsoData, content,  clickableDivs = true;
 
 
 //Debugging code for checking flipping issue STARTS
@@ -99,7 +99,7 @@ function visualize(CalipsoData, dateString, time) {
         return;
     }
 
-    var trackColor;
+    var trackColor, clickableDivs = true;
     if (prevDate != dateString || firstVisualize == 0) {
         document.getElementById("pb_list_items").innerHTML = "<div id=pb_item>Date: " + dateString + "</div><br>";
     }
@@ -150,7 +150,8 @@ function visualize(CalipsoData, dateString, time) {
                         outline: true,
                         outlineWidth: 1.0,
                         outlineColor: Cesium.Color.BLACK
-                    }
+                    },
+		show: true
                 });
             }
 
@@ -252,6 +253,9 @@ function pickEntityClick(viewer, windowPosition) {
 
             if (entityInstance.wall.outline._value == true) { //It is a Marker, so display Data Curtain
                 document.getElementsByName(entityInstance.id)[0].id = "pb_item_clicked";
+		var myElement = document.getElementById('pb_item_clicked');
+		var topPos = myElement.offsetTop;
+		document.getElementById('pb_list').scrollTop = topPos-300;
                 var coords = CalipsoData[indices[0]].curtains[indices[1]].sections[indices[2]].coordinates;
                 var maxHts = new Array(2);
                 for (var j = 0; j < (2); j++) {
@@ -276,6 +280,12 @@ viewer.camera.zoomOut(10000000);
 
 
             } else { // It is a Data Curtain, display Marker --Toggle
+ 	for (var j = 0; j < viewer.entities.values.length; j++) {
+ 		//console.log(viewer.entities.values.length);
+		var entityToHide = viewer.entities.values[j];
+		if(!entityToHide.show)
+		entityToHide.show = !entityToHide.show;
+}
                 document.getElementsByName(entityInstance.id)[0].id = "pb_item_data";
                 var coords = CalipsoData[indices[0]].curtains[indices[1]].sections[indices[2]].coordinates;
                 var maxHts = new Array(2);
@@ -304,6 +314,7 @@ viewer.camera.zoomOut(10000000);
 
 
 function pickEntityHover(viewer, windowPosition) {
+    console.log("In hover");
     var picked = viewer.scene.pick(windowPosition);
     var indices;
     if (Cesium.defined(picked) && CalipsoData != null) {
@@ -493,6 +504,7 @@ function handleSetTime(e) {
 
         prevEId = -1;
         viewer.entities.removeAll();
+	//viewer.entities.remove(viewer.selectedEntity);
         readJSON(dateString, function(responseText) {
             CalipsoData = JSON.parse(responseText);
             visualize(CalipsoData, dateString, gregorian);
@@ -504,6 +516,7 @@ function handleSetTime(e) {
 }
 
 function hoveredDiv(name) {
+
     console.log("Hovered on " + name);
     entityInstance = viewer.entities.getById(name);
     var numberPattern = /\d+/g;
@@ -526,25 +539,36 @@ function hoveredDiv(name) {
 }
 
 function clickedDiv(name) {
-
+ if(!clickableDivs){
+   toggleMarkers();
+   return;
+   }
+   console.log(name);
     entityInstance = viewer.entities.getById(name);
-
+   
     var numberPattern = /\d+/g;
     var indices = name.match(numberPattern);
+    console.log("indices=",indices);
+    if(CalipsoData[indices[0]]) {
     if(CalipsoData[indices[0]].curtains[indices[1]]) {
+/*  
     var entity = new Cesium.Entity({
         name: "532nm Total Attenuated Backscatter"
     });
-    entity.description = {
+ 
+ entity.description = {
         getValue: function() {
             return "Date : " + CalipsoData[indices[0]].date + "<br>Orbit : " + CalipsoData[indices[0]].curtains[indices[1]].orbit + "<br>Start Time (UTC) :  " + CalipsoData[indices[0]].curtains[indices[1]].sections[indices[2]].start_time + "<br>End Time (UTC) : " + CalipsoData[indices[0]].curtains[indices[1]].sections[indices[2]].end_time;
         }
     };
-    viewer.selectedEntity = entity;
-
+    viewer.selectedEntity = entity;*/
+    //entityInstance.show = !entityInstance.show;
 
     if (entityInstance.wall.outline._value == true) { //It is a Marker, so display Data Curtain
         document.getElementsByName(name)[0].id = "pb_item_clicked";
+	console.log("Its a marker");
+
+    	//entityInstance.show = true;
         var coords = CalipsoData[indices[0]].curtains[indices[1]].sections[indices[2]].coordinates;
         var maxHts = new Array(2);
         for (var j = 0; j < 2; j++) {
@@ -568,7 +592,14 @@ viewer.camera.setView({
 viewer.camera.zoomOut(10000000);
 
     } else {
+	console.log("Its a data curtain");
         // It is a Data Curtain, display Marker --Toggle
+ 	for (var j = 0; j < viewer.entities.values.length; j++) {
+ 		//console.log(viewer.entities.values.length);
+		var entityToHide = viewer.entities.values[j];
+		if(!entityToHide.show)
+		entityToHide.show = !entityToHide.show;
+}
         document.getElementsByName(name)[0].id = "pb_item_data";
         var coords = CalipsoData[indices[0]].curtains[indices[1]].sections[indices[2]].coordinates;
         var maxHts = new Array(2);
@@ -591,6 +622,9 @@ viewer.camera.zoomOut(10000000);
 
 }
 }
+console.log("I am done");
+}
+
 
 function leftDiv(name) {
     console.log("Left  " + name);
@@ -614,6 +648,16 @@ function leftDiv(name) {
 
     }
 }
+
+function toggleMarkers() {
+clickableDivs = !clickableDivs; 
+ for (var j = 0; j < viewer.entities.values.length; j++) {
+ 		//console.log(viewer.entities.values.length);
+		var entityToHide = viewer.entities.values[j];
+		if(entityToHide.wall.outline._value == true)
+		entityToHide.show = !entityToHide.show;
+}
+}
 //Event Handler for Click
 handler.setInputAction(function(movement) {
     pickEntityClick(viewer, movement.position);
@@ -627,3 +671,4 @@ handler.setInputAction(function(movement) {
 
 
 viewer.timeline.addEventListener('settime', handleSetTime, false);
+
