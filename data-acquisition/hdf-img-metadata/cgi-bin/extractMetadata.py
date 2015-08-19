@@ -27,8 +27,10 @@ m = re.search('CAL_LID_L1-ValStage1-V3-30.(.+?)T([0-9\-]+)', filename)
 if m:
 	date = m.group(1)
 
-output_dir = os.path.join(os.path.dirname(__file__))
-metadata_file = os.path.join(output_dir, date+'.json')
+if not os.path.exists('meta-data'):
+    os.makedirs('meta-data')
+metadata_dir = os.path.join(os.path.dirname(__file__), "meta-data")
+metadata_file = os.path.join(metadata_dir, date+'.json')
 
 f = open(metadata_file, 'w')
 f.write('[\n{\"date\": \"'+date+'\",\n\"curtains\": [\n')
@@ -52,7 +54,7 @@ for x in range(1,len(sys.argv)):
 	if __name__ == '__main__':
 	    with HDF(filename) as product:
 
-		if product['Day_Night_Flag'][0][0] == 1:
+		if product['Day_Night_Flag'][0][0] == 0:
 			orbitType = 'Daytime'
 		else:
 			orbitType = 'Nighttime'
@@ -99,10 +101,13 @@ for x in range(1,len(sys.argv)):
 					start += step
 
 			latLon = []
-			for index in my_range(x1, x2, 100):
+			latLon.append(float(product['Longitude'][x1][0]))
+			latLon.append(float(product['Latitude'][x1][0]))
+			for index in my_range(x1+1, x2-1, 100):
 		   		latLon.append(float(product['Longitude'][index][0]))
 				latLon.append(float(product['Latitude'][index][0]))
-
+			latLon.append(float(product['Longitude'][x2][0]))
+			latLon.append(float(product['Latitude'][x2][0]))
 
 
 
