@@ -332,44 +332,77 @@ function pickEntityHover(viewer, windowPosition) {
 
             } else { //Data-Curtain
 
-	   if(!(viewer.entities.getById('alt'))){
-           var altCoords = [];
-	   altCoords.push(CalipsoData[0].curtains[indices[1]].sections[indices[2]].coordinates[0]);
-	   altCoords.push(CalipsoData[0].curtains[indices[1]].sections[indices[2]].coordinates[1]);
+           var coordsLen = CalipsoData[0].curtains[indices[1]].sections[indices[2]].coordinates.length;
 
-	   altCoords.push(CalipsoData[0].curtains[indices[1]].sections[indices[2]].coordinates[12]);
-	   altCoords.push(CalipsoData[0].curtains[indices[1]].sections[indices[2]].coordinates[13]);
+	   if(!(viewer.entities.getById('alt1'))){
+           var altCoords1 = [];
+	   altCoords1.push(CalipsoData[0].curtains[indices[1]].sections[indices[2]].coordinates[0]);
+	   altCoords1.push(CalipsoData[0].curtains[indices[1]].sections[indices[2]].coordinates[1]);
+
+	   altCoords1.push(CalipsoData[0].curtains[indices[1]].sections[indices[2]].coordinates[12]);
+	   altCoords1.push(CalipsoData[0].curtains[indices[1]].sections[indices[2]].coordinates[13]);
 		CalipsoData[0].curtains[indices[1]].sections[indices[2]].coordinates;
-            var maxHts = new Array(altCoords.length / 2);
+            var maxHts = new Array(altCoords1.length / 2);
             //Populate MaxHts array
-            for (var j = 0; j < altCoords.length / 2; j++) {
+            for (var j = 0; j < altCoords1.length / 2; j++) {
                 maxHts[j] = 2000000;
             }
 
 
                 viewer.entities.add({
                     name: 'Atitude',
-                    id: 'alt',
+                    id: 'alt1',
                     wall: {
-                        positions: Cesium.Cartesian3.fromDegreesArray(altCoords),
+                        positions: Cesium.Cartesian3.fromDegreesArray(altCoords1),
                         maximumHeights: maxHts,
-                        material: 'images/test.png',
+                        material: 'images/scale.png',
                         outline: false
                     }
                 });
             }
+	   if(!(viewer.entities.getById('alt2'))){
+           var altCoords2 = [];
+	   altCoords2.push(CalipsoData[0].curtains[indices[1]].sections[indices[2]].coordinates[coordsLen-2]);
+	   altCoords2.push(CalipsoData[0].curtains[indices[1]].sections[indices[2]].coordinates[coordsLen-1]);
+
+	   altCoords2.push(CalipsoData[0].curtains[indices[1]].sections[indices[2]].coordinates[coordsLen-12]);
+	   altCoords2.push(CalipsoData[0].curtains[indices[1]].sections[indices[2]].coordinates[coordsLen-11]);
+		CalipsoData[0].curtains[indices[1]].sections[indices[2]].coordinates;
+            var maxHts = new Array(altCoords2.length / 2);
+            //Populate MaxHts array
+            for (var j = 0; j < altCoords2.length / 2; j++) {
+                maxHts[j] = 2000000;
+            }
+
+
+                viewer.entities.add({
+                    name: 'Atitude',
+                    id: 'alt2',
+                    wall: {
+                        positions: Cesium.Cartesian3.fromDegreesArray(altCoords2),
+                        maximumHeights: maxHts,
+                        material: 'images/scale.png',
+                        outline: false
+                    }
+                });
+            }
+
 	}
         } 
 	
     } else {
-	if(viewer.entities.getById('alt'))
-	viewer.entities.remove(viewer.entities.getById('alt'));
+	
         clearOnHoverOver(tempEntity);
     }
 };
 
 function clearOnHoverOver(tempEntity) {
     if (typeof tempEntity !== 'undefined' && CalipsoData != null) {
+	if(viewer.entities.getById('alt1'))
+	viewer.entities.remove(viewer.entities.getById('alt1'));
+	if(viewer.entities.getById('alt2'))
+	viewer.entities.remove(viewer.entities.getById('alt2'));
+
         var numberPattern = /\d+/g;
         var indices = tempEntity.id.match(numberPattern);
 

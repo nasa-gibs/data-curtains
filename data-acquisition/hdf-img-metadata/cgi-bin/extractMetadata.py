@@ -101,10 +101,13 @@ for x in range(1,len(sys.argv)):
 					start += step
 
 			latLon = []
-			for index in my_range(x1, x2, 100):
+			latLon.append(float(product['Longitude'][x1][0]))
+			latLon.append(float(product['Latitude'][x1][0]))
+			for index in my_range(x1+1, x2-1, 100):
 		   		latLon.append(float(product['Longitude'][index][0]))
 				latLon.append(float(product['Latitude'][index][0]))
-
+			latLon.append(float(product['Longitude'][x2][0]))
+			latLon.append(float(product['Latitude'][x2][0]))
 
 
 

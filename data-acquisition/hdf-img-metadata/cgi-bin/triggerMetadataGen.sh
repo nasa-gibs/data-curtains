@@ -97,33 +97,13 @@ cgi_getvars BOTH ALL
 echo "Selected Date = "$date
 
 i=0
-#s1='img'
-#s2='meta'
-#if [ "$img" = "$s1" ];
-#then
-echo "Extracted Imagery..."
-for file in "$HDF_DIR"/CAL_LID_L1-ValStage1-V3-30.$date*
-do
-	python extractImagery.py $file
-done
-#else
-#echo "Imagery Extraction Not Selected"
-#fi
 
-#if [ "$meta" = "$s2" ];
-#then
-echo "Extracted Metadata"
 for file in "$HDF_DIR"/CAL_LID_L1-ValStage1-V3-30.$date*
 do
-#		echo "$i"
 	hdfs["$i"]=$file
 	((i=i+1))
-	python extractImagery.py $file
 done
 
-	python extractMetadata.py ${hdfs[@]}
-#else
-#echo "Metadata Extraction Not Selected"
-#fi
+python extractMetadata.py ${hdfs[@]}
+echo "Extracted Metadata"
 
-#echo "Done!"
