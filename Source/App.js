@@ -1,62 +1,9 @@
-var provider = new Cesium.WebMapTileServiceImageryProvider({
-    url: "//map1.vis.earthdata.nasa.gov/wmts-webmerc/wmts.cgi?TIME=2015-01-01", //Will require the date to be changed dynamically, from the Cesium Timeline Widget input.
-    layer: "MODIS_Aqua_CorrectedReflectance_TrueColor",
-    style: "",
-    format: "image/jpeg",
-    tileMatrixSetID: "GoogleMapsCompatible_Level9",
-    maximumLevel: 9,
-    tileWidth: 256,
-    tileHeight: 256,
-    tilingScheme: new Cesium.WebMercatorTilingScheme()
-});
 
-var viewer = new Cesium.Viewer("cesiumContainer", {
-    animation: false, // Only showing one day in this demo
-    baseLayerPicker: false, // Only showing one layer in this demo
-    timeline: true, // Only showing one day in this demo
-    imageryProvider: provider, // The layer being shown
-    //sceneMode : Cesium.SceneMode.COLUMBUS_VIEW
-});
-
-var layers = viewer.scene.imageryLayers;
-
-var tempEntity, dateString, eId;
-var scene = viewer.scene;
-var ellipsoid = scene.globe.ellipsoid;
-handler = new Cesium.ScreenSpaceEventHandler(scene.canvas);
-var prevDate = "2015-01-01",
-    prevEId = -1,
-    firstVisualize = 0;
-var CalipsoData, content,  clickableDivs = true;
-
-
-//Debugging code for checking flipping issue STARTS
 /*
-    var ellipsoid = scene.globe.ellipsoid;
-    var entity = viewer.entities.add({
-        label : {
-            show : false
-        }
-    });
-
-    // Mouse over the globe to see the cartographic position
-    handler = new Cesium.ScreenSpaceEventHandler(scene.canvas);
-    handler.setInputAction(function(movement) {
-        var cartesian = viewer.camera.pickEllipsoid(movement.endPosition, ellipsoid);
-        if (cartesian) {
-            var cartographic = ellipsoid.cartesianToCartographic(cartesian);
-            var longitudeString = Cesium.Math.toDegrees(cartographic.longitude).toFixed(2);
-            var latitudeString = Cesium.Math.toDegrees(cartographic.latitude).toFixed(2);
-
-            entity.position = cartesian;
-            entity.label.show = true;
-            entity.label.text = '(' + longitudeString + ', ' + latitudeString + ')';
-        } else {
-            entity.label.show = false;
-        }
-    }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
-*/
-//Debugging code for checking flipping issue ENDS
+ * Reads metadata from a .json file for the specified date
+ * @param {String} metadata_date
+ * @param {function} callback 
+ */
 function readJSON(metadata_date, callback) {
     var xhttpObj = new XMLHttpRequest();
     xhttpObj.overrideMimeType("application/json");
@@ -70,30 +17,16 @@ function readJSON(metadata_date, callback) {
     };
     xhttpObj.send(null);
 }
-viewer.clock.startTime = Cesium.JulianDate.fromIso8601("2015-01-01"),
-    viewer.clock.currentTime = Cesium.JulianDate.fromIso8601("2015-01-02"),
-    viewer.clock.stopTime = Cesium.JulianDate.fromIso8601("2015-01-05"),
-    viewer.clock.clockRange = Cesium.ClockRange.LOOP_STOP,
-    viewer.clock.clockStep = Cesium.ClockStep.SYSTEM_CLOCK_MULTIPLIER
 
 
-//Update the Timeline to the Clock
-viewer.timeline.updateFromClock();
-viewer.timeline.zoomTo(viewer.clock.startTime, viewer.clock.stopTime);
-
-
-
-
-readJSON("2015-01-01", function(responseText) {
-    //Read metadata.json
-    CalipsoData = JSON.parse(responseText);
-    //Set the Clock to Jan 01, 2015
-    //Generate the markers from the JSON
-    visualize(CalipsoData, "2015-01-01", -1);
-
-});
-
+/*
+ * Adds the orbital tracks and LiDAR curtains for the specified date
+ * @param {Array} CalipsoData
+ * @param {String} dateString 
+ * @param {String} time 
+ */
 function visualize(CalipsoData, dateString, time) {
+
     if (CalipsoData == null) {
         console.log("Data from JSON is null");
         return;
@@ -126,9 +59,10 @@ function visualize(CalipsoData, dateString, time) {
                 content = "<div id=pb_item_data name=D0C" + m + "S" + i + " onmouseover=hoveredDiv('D0C" + m + "S" + i + "'); onclick=clickedDiv('D0C" + m + "S" + i + "'); onmouseleave=leftDiv('D0C" + m + "S" + i + "');><table><tr><td><img src=" + CalipsoData[0].curtains[m].sections[i].img + " height=35 width=80/></td><td>&nbsp;Start Time: " + CalipsoData[0].curtains[m].sections[i].start_time + "<br>&nbsp;End Time: &nbsp;" + CalipsoData[0].curtains[m].sections[i].end_time + "</td></tr></table></div>";
                 document.getElementById("pb_list_items").innerHTML += content;
             }
-            //document.getElementById("pb_list_items").innerHTML += "<div id=pb_item>Section "+(i+1)+"</div>"; 
+
             var coords = CalipsoData[0].curtains[m].sections[i].coordinates;
             var maxHts = new Array(2);
+
             //Populate MaxHts array
             for (var j = 0; j < 2; j++) {
                 maxHts[j] = 500000;
@@ -138,26 +72,24 @@ function visualize(CalipsoData, dateString, time) {
                 eId = 'D' + 0 + 'C' + m + 'S' + i;
             }
 
+            //Only add entities (orbital tracks) if the previous date and the selected date are different
             if (prevDate != dateString || firstVisualize == 0) {
                 viewer.entities.add({
                     name: '532nm Total Attenuated Backscatter',
                     id: 'D' + 0 + 'C' + m + 'S' + i,
                     description: "Date : " + CalipsoData[0].date + "<br>Orbit : " + CalipsoData[0].curtains[m].orbit + "<br>Start Time (UTC) :  " + CalipsoData[0].curtains[m].sections[i].start_time + "<br>End Time (UTC) : " + CalipsoData[0].curtains[m].sections[i].end_time,
                     wall: {
-                        positions: Cesium.Cartesian3.fromDegreesArray([coords[0],coords[1],coords[coords.length - 2], coords[coords.length -1]]),
-                        maximumHeights: [500000,500000],
+                        positions: Cesium.Cartesian3.fromDegreesArray([coords[0], coords[1], coords[coords.length - 2], coords[coords.length - 1]]),
+                        maximumHeights: [500000, 500000],
                         material: trackColor,
                         outline: true,
                         outlineWidth: 1.0,
                         outlineColor: Cesium.Color.BLACK
                     },
-		show: true
+                    show: true
                 });
             }
 
-
-
-            //Add |content| to innerHTML here
         }
 
         document.getElementById("pb_list_items").innerHTML += "<br>";
@@ -205,6 +137,12 @@ function visualize(CalipsoData, dateString, time) {
 }
 
 
+/*
+ * Returns whether the selected time falls between the start and the end time
+ * @param {String} time
+ * @param {String} startTime 
+ * @param {String} endTime 
+ */
 function isMarkerTime(time, startTime, endTime) {
 
     if (time != -1) {
@@ -243,6 +181,11 @@ function isMarkerTime(time, startTime, endTime) {
     }
 }
 
+/*
+ * Display/Toggle between marker and curtain after clicking on a section of an orbital track
+ * @param {Cesium.viewer} viewer
+ * @param {movement.position} windowPosition 
+ */
 function pickEntityClick(viewer, windowPosition) {
     var picked = viewer.scene.pick(windowPosition);
     if (Cesium.defined(picked) && CalipsoData != null) {
@@ -253,9 +196,9 @@ function pickEntityClick(viewer, windowPosition) {
 
             if (entityInstance.wall.outline._value == true) { //It is a Marker, so display Data Curtain
                 document.getElementsByName(entityInstance.id)[0].id = "pb_item_clicked";
-		var myElement = document.getElementById('pb_item_clicked');
-		var topPos = myElement.offsetTop;
-		document.getElementById('pb_list').scrollTop = topPos-300;
+                var myElement = document.getElementById('pb_item_clicked');
+                var topPos = myElement.offsetTop;
+                document.getElementById('pb_list').scrollTop = topPos - 300;
                 var coords = CalipsoData[indices[0]].curtains[indices[1]].sections[indices[2]].coordinates;
                 var maxHts = new Array(2);
                 for (var j = 0; j < (2); j++) {
@@ -265,27 +208,28 @@ function pickEntityClick(viewer, windowPosition) {
                 entityInstance.wall.outline = false;
                 entityInstance.wall.material = CalipsoData[indices[0]].curtains[indices[1]].sections[indices[2]].img;
 
-   var halfLon = (coords.length)/2;
-var halfLat = (coords.length)/2+1;
+                //Center Coordinates to focus on, when user clicks on a section of orbital track
+                var halfLon = (coords.length) / 2;
+                var halfLat = (coords.length) / 2 + 1;
 
-viewer.camera.setView({
-    position : Cesium.Cartesian3.fromDegrees(CalipsoData[indices[0]].curtains[indices[1]].sections[indices[2]].coordinates[halfLon], CalipsoData[indices[0]].curtains[indices[1]].sections[indices[2]].coordinates[halfLat], 50000.0),
-    heading : Cesium.Math.toRadians(90.0), // east, default value is 0.0 (north)
-    pitch : Cesium.Math.toRadians(-45),    // default value (looking down)
-    roll : 0.0                             // default value
-});
-viewer.camera.zoomOut(10000000);
+                viewer.camera.setView({
+                    position: Cesium.Cartesian3.fromDegrees(CalipsoData[indices[0]].curtains[indices[1]].sections[indices[2]].coordinates[halfLon], CalipsoData[indices[0]].curtains[indices[1]].sections[indices[2]].coordinates[halfLat], 50000.0),
+                    heading: Cesium.Math.toRadians(90.0), // east, default value is 0.0 (north)
+                    pitch: Cesium.Math.toRadians(-45), // default value (looking down)
+                    roll: 0.0 // default value
+                });
+                viewer.camera.zoomOut(10000000);
 
 
 
 
             } else { // It is a Data Curtain, display Marker --Toggle
- 	for (var j = 0; j < viewer.entities.values.length; j++) {
- 		//console.log(viewer.entities.values.length);
-		var entityToHide = viewer.entities.values[j];
-		if(!entityToHide.show)
-		entityToHide.show = !entityToHide.show;
-}
+                for (var j = 0; j < viewer.entities.values.length; j++) {
+
+                    var entityToHide = viewer.entities.values[j];
+                    if (!entityToHide.show)
+                        entityToHide.show = !entityToHide.show;
+                }
                 document.getElementsByName(entityInstance.id)[0].id = "pb_item_data";
                 var coords = CalipsoData[indices[0]].curtains[indices[1]].sections[indices[2]].coordinates;
                 var maxHts = new Array(2);
@@ -312,7 +256,11 @@ viewer.camera.zoomOut(10000000);
 };
 
 
-
+/*
+ * Display/Toggle between marker and curtain after hovering on a section of an orbital track
+ * @param {Cesium.viewer} viewer
+ * @param {movement.position} windowPosition 
+ */
 function pickEntityHover(viewer, windowPosition) {
     console.log("In hover");
     var picked = viewer.scene.pick(windowPosition);
@@ -343,76 +291,80 @@ function pickEntityHover(viewer, windowPosition) {
 
             } else { //Data-Curtain
 
-           var coordsLen = CalipsoData[0].curtains[indices[1]].sections[indices[2]].coordinates.length;
+                var coordsLen = CalipsoData[0].curtains[indices[1]].sections[indices[2]].coordinates.length;
 
-	   if(!(viewer.entities.getById('alt1'))){
-           var altCoords1 = [];
-	   altCoords1.push(CalipsoData[0].curtains[indices[1]].sections[indices[2]].coordinates[0]);
-	   altCoords1.push(CalipsoData[0].curtains[indices[1]].sections[indices[2]].coordinates[1]);
+                if (!(viewer.entities.getById('alt1'))) {
+                    var altCoords1 = [];
+                    altCoords1.push(CalipsoData[0].curtains[indices[1]].sections[indices[2]].coordinates[0]);
+                    altCoords1.push(CalipsoData[0].curtains[indices[1]].sections[indices[2]].coordinates[1]);
 
-	   altCoords1.push(CalipsoData[0].curtains[indices[1]].sections[indices[2]].coordinates[12]);
-	   altCoords1.push(CalipsoData[0].curtains[indices[1]].sections[indices[2]].coordinates[13]);
-		CalipsoData[0].curtains[indices[1]].sections[indices[2]].coordinates;
-            var maxHts = new Array(altCoords1.length / 2);
-            //Populate MaxHts array
-            for (var j = 0; j < altCoords1.length / 2; j++) {
-                maxHts[j] = 2000000;
-            }
-
-
-                viewer.entities.add({
-                    name: 'Atitude',
-                    id: 'alt1',
-                    wall: {
-                        positions: Cesium.Cartesian3.fromDegreesArray(altCoords1),
-                        maximumHeights: maxHts,
-                        material: 'images/scale.png',
-                        outline: false
+                    altCoords1.push(CalipsoData[0].curtains[indices[1]].sections[indices[2]].coordinates[12]);
+                    altCoords1.push(CalipsoData[0].curtains[indices[1]].sections[indices[2]].coordinates[13]);
+                    CalipsoData[0].curtains[indices[1]].sections[indices[2]].coordinates;
+                    var maxHts = new Array(altCoords1.length / 2);
+                    //Populate MaxHts array
+                    for (var j = 0; j < altCoords1.length / 2; j++) {
+                        maxHts[j] = 2000000;
                     }
-                });
-            }
-	   if(!(viewer.entities.getById('alt2'))){
-           var altCoords2 = [];
-	   altCoords2.push(CalipsoData[0].curtains[indices[1]].sections[indices[2]].coordinates[coordsLen-2]);
-	   altCoords2.push(CalipsoData[0].curtains[indices[1]].sections[indices[2]].coordinates[coordsLen-1]);
-
-	   altCoords2.push(CalipsoData[0].curtains[indices[1]].sections[indices[2]].coordinates[coordsLen-12]);
-	   altCoords2.push(CalipsoData[0].curtains[indices[1]].sections[indices[2]].coordinates[coordsLen-11]);
-		CalipsoData[0].curtains[indices[1]].sections[indices[2]].coordinates;
-            var maxHts = new Array(altCoords2.length / 2);
-            //Populate MaxHts array
-            for (var j = 0; j < altCoords2.length / 2; j++) {
-                maxHts[j] = 2000000;
-            }
 
 
-                viewer.entities.add({
-                    name: 'Atitude',
-                    id: 'alt2',
-                    wall: {
-                        positions: Cesium.Cartesian3.fromDegreesArray(altCoords2),
-                        maximumHeights: maxHts,
-                        material: 'images/scale.png',
-                        outline: false
+                    viewer.entities.add({
+                        name: 'Atitude',
+                        id: 'alt1',
+                        wall: {
+                            positions: Cesium.Cartesian3.fromDegreesArray(altCoords1),
+                            maximumHeights: maxHts,
+                            material: 'images/scale.png',
+                            outline: false
+                        }
+                    });
+                }
+                if (!(viewer.entities.getById('alt2'))) {
+                    var altCoords2 = [];
+                    altCoords2.push(CalipsoData[0].curtains[indices[1]].sections[indices[2]].coordinates[coordsLen - 2]);
+                    altCoords2.push(CalipsoData[0].curtains[indices[1]].sections[indices[2]].coordinates[coordsLen - 1]);
+
+                    altCoords2.push(CalipsoData[0].curtains[indices[1]].sections[indices[2]].coordinates[coordsLen - 12]);
+                    altCoords2.push(CalipsoData[0].curtains[indices[1]].sections[indices[2]].coordinates[coordsLen - 11]);
+                    CalipsoData[0].curtains[indices[1]].sections[indices[2]].coordinates;
+                    var maxHts = new Array(altCoords2.length / 2);
+                    //Populate MaxHts array
+                    for (var j = 0; j < altCoords2.length / 2; j++) {
+                        maxHts[j] = 2000000;
                     }
-                });
-            }
 
-	}
-        } 
-	
+
+                    viewer.entities.add({
+                        name: 'Atitude',
+                        id: 'alt2',
+                        wall: {
+                            positions: Cesium.Cartesian3.fromDegreesArray(altCoords2),
+                            maximumHeights: maxHts,
+                            material: 'images/scale.png',
+                            outline: false
+                        }
+                    });
+                }
+
+            }
+        }
+
     } else {
-	
+
         clearOnHoverOver(tempEntity);
     }
 };
 
+/*
+ * Clear on hover over event
+ * @param {Cesium.Entity} tempEntity
+ */
 function clearOnHoverOver(tempEntity) {
     if (typeof tempEntity !== 'undefined' && CalipsoData != null) {
-	if(viewer.entities.getById('alt1'))
-	viewer.entities.remove(viewer.entities.getById('alt1'));
-	if(viewer.entities.getById('alt2'))
-	viewer.entities.remove(viewer.entities.getById('alt2'));
+        if (viewer.entities.getById('alt1'))
+            viewer.entities.remove(viewer.entities.getById('alt1'));
+        if (viewer.entities.getById('alt2'))
+            viewer.entities.remove(viewer.entities.getById('alt2'));
 
         var numberPattern = /\d+/g;
         var indices = tempEntity.id.match(numberPattern);
@@ -434,6 +386,10 @@ function clearOnHoverOver(tempEntity) {
 
 }
 
+/*
+ * Changes the base layer and highlights a section of the orbital track on setting time on the Timeline
+ * @param {Event} e
+ */
 function handleSetTime(e) {
     if (Cesium.defined(viewer.timeline)) {
 
@@ -453,27 +409,27 @@ function handleSetTime(e) {
         if (prevDate != dateString) {
             console.log("Code to Change Base Imagery goes here");
 
-		var destination = scene.camera.getRectangleCameraCoordinates(Cesium.Camera.DEFAULT_VIEW_RECTANGLE);
+            var destination = scene.camera.getRectangleCameraCoordinates(Cesium.Camera.DEFAULT_VIEW_RECTANGLE);
 
-                    var mag = Cesium.Cartesian3.magnitude(destination);
-                    mag += mag * Cesium.Camera.DEFAULT_VIEW_FACTOR;
-                    Cesium.Cartesian3.normalize(destination, destination);
-                    Cesium.Cartesian3.multiplyByScalar(destination, mag, destination);
+            var mag = Cesium.Cartesian3.magnitude(destination);
+            mag += mag * Cesium.Camera.DEFAULT_VIEW_FACTOR;
+            Cesium.Cartesian3.normalize(destination, destination);
+            Cesium.Cartesian3.multiplyByScalar(destination, mag, destination);
 
-                    direction = Cesium.Cartesian3.normalize(destination, new Cesium.Cartesian3());
-                    Cesium.Cartesian3.negate(direction, direction);
-                    right = Cesium.Cartesian3.cross(direction, Cesium.Cartesian3.UNIT_Z, new Cesium.Cartesian3());
-                    up = Cesium.Cartesian3.cross(right, direction, new Cesium.Cartesian3());
+            direction = Cesium.Cartesian3.normalize(destination, new Cesium.Cartesian3());
+            Cesium.Cartesian3.negate(direction, direction);
+            right = Cesium.Cartesian3.cross(direction, Cesium.Cartesian3.UNIT_Z, new Cesium.Cartesian3());
+            up = Cesium.Cartesian3.cross(right, direction, new Cesium.Cartesian3());
 
-                    scene.camera.flyTo({
-                        destination: destination,
-                        orientation: {
-                            direction: direction,
-                            up: up
-                        },
-                        duration: 1.5,
-                        endTransform: Cesium.Matrix4.IDENTITY
-                    });
+            scene.camera.flyTo({
+                destination: destination,
+                orientation: {
+                    direction: direction,
+                    up: up
+                },
+                duration: 1.5,
+                endTransform: Cesium.Matrix4.IDENTITY
+            });
 
 
 
@@ -481,7 +437,7 @@ function handleSetTime(e) {
 
             layers.addImageryProvider(new Cesium.WebMapTileServiceImageryProvider({
 
-                url: "http://map1.vis.earthdata.nasa.gov/wmts-webmerc/wmts.cgi?TIME=" + dateString, //Will require the date to be changed dynamically, from the Cesium Timeline Widget input.
+                url: "http://map1.vis.earthdata.nasa.gov/wmts-webmerc/wmts.cgi?TIME=" + dateString, //Date changes dynamically, from the Cesium Timeline Widget input.
                 layer: "MODIS_Aqua_CorrectedReflectance_TrueColor",
                 style: "",
                 format: "image/jpeg",
@@ -504,7 +460,7 @@ function handleSetTime(e) {
 
         prevEId = -1;
         viewer.entities.removeAll();
-	//viewer.entities.remove(viewer.selectedEntity);
+
         readJSON(dateString, function(responseText) {
             CalipsoData = JSON.parse(responseText);
             visualize(CalipsoData, dateString, gregorian);
@@ -515,6 +471,11 @@ function handleSetTime(e) {
     }
 }
 
+
+/*
+ * Highlight a section of the orbital track on hovering on a list item in the Profile Browser
+ * @param {String} name
+ */
 function hoveredDiv(name) {
 
     console.log("Hovered on " + name);
@@ -538,94 +499,90 @@ function hoveredDiv(name) {
     }
 }
 
+
+/*
+ * Clicking on a list item in the Profile Browser display the LiDAR Curtain and zooms to it
+ * @param {String} name
+ */
 function clickedDiv(name) {
- if(!clickableDivs){
-   toggleMarkers();
-   return;
-   }
-   console.log(name);
+    if (!clickableDivs) {
+        toggleMarkers();
+        return;
+    }
+    console.log(name);
     entityInstance = viewer.entities.getById(name);
-   
+
     var numberPattern = /\d+/g;
     var indices = name.match(numberPattern);
-    console.log("indices=",indices);
-    if(CalipsoData[indices[0]]) {
-    if(CalipsoData[indices[0]].curtains[indices[1]]) {
-/*  
-    var entity = new Cesium.Entity({
-        name: "532nm Total Attenuated Backscatter"
-    });
- 
- entity.description = {
-        getValue: function() {
-            return "Date : " + CalipsoData[indices[0]].date + "<br>Orbit : " + CalipsoData[indices[0]].curtains[indices[1]].orbit + "<br>Start Time (UTC) :  " + CalipsoData[indices[0]].curtains[indices[1]].sections[indices[2]].start_time + "<br>End Time (UTC) : " + CalipsoData[indices[0]].curtains[indices[1]].sections[indices[2]].end_time;
-        }
-    };
-    viewer.selectedEntity = entity;*/
-    //entityInstance.show = !entityInstance.show;
+    console.log("indices=", indices);
+    if (CalipsoData[indices[0]]) {
+        if (CalipsoData[indices[0]].curtains[indices[1]]) {
 
-    if (entityInstance.wall.outline._value == true) { //It is a Marker, so display Data Curtain
-        document.getElementsByName(name)[0].id = "pb_item_clicked";
-	console.log("Its a marker");
 
-    	//entityInstance.show = true;
-        var coords = CalipsoData[indices[0]].curtains[indices[1]].sections[indices[2]].coordinates;
-        var maxHts = new Array(2);
-        for (var j = 0; j < 2; j++) {
-            maxHts[j] = 2000000;
-        }
+            if (entityInstance.wall.outline._value == true) { //It is a Marker, so display Data Curtain
+                document.getElementsByName(name)[0].id = "pb_item_clicked";
+                console.log("Its a marker");
 
-        entityInstance.wall.outline = false;
-        entityInstance.wall.material = CalipsoData[indices[0]].curtains[indices[1]].sections[indices[2]].img;
-	
-	
+                var coords = CalipsoData[indices[0]].curtains[indices[1]].sections[indices[2]].coordinates;
+                var maxHts = new Array(2);
+                for (var j = 0; j < 2; j++) {
+                    maxHts[j] = 2000000;
+                }
 
-var halfLon = (coords.length)/2;
-var halfLat = (coords.length)/2+1;
+                entityInstance.wall.outline = false;
+                entityInstance.wall.material = CalipsoData[indices[0]].curtains[indices[1]].sections[indices[2]].img;
 
-viewer.camera.setView({
-    position : Cesium.Cartesian3.fromDegrees(CalipsoData[indices[0]].curtains[indices[1]].sections[indices[2]].coordinates[halfLon], CalipsoData[indices[0]].curtains[indices[1]].sections[indices[2]].coordinates[halfLat], 50000.0),
-    heading : Cesium.Math.toRadians(90.0), // east, default value is 0.0 (north)
-    pitch : Cesium.Math.toRadians(-45),    // default value (looking down)
-    roll : 0.0                             // default value
-});
-viewer.camera.zoomOut(10000000);
 
-    } else {
-	console.log("Its a data curtain");
-        // It is a Data Curtain, display Marker --Toggle
- 	for (var j = 0; j < viewer.entities.values.length; j++) {
- 		//console.log(viewer.entities.values.length);
-		var entityToHide = viewer.entities.values[j];
-		if(!entityToHide.show)
-		entityToHide.show = !entityToHide.show;
-}
-        document.getElementsByName(name)[0].id = "pb_item_data";
-        var coords = CalipsoData[indices[0]].curtains[indices[1]].sections[indices[2]].coordinates;
-        var maxHts = new Array(2);
-        for (var j = 0; j < (2); j++) {
-            maxHts[j] = 500000;
-        }
-        setTimeout(function() {
-            if (CalipsoData[indices[0]].curtains[indices[1]].orbit == "Daytime") {
-                trackColor = Cesium.Color.RED;
+
+                var halfLon = (coords.length) / 2;
+                var halfLat = (coords.length) / 2 + 1;
+
+                viewer.camera.setView({
+                    position: Cesium.Cartesian3.fromDegrees(CalipsoData[indices[0]].curtains[indices[1]].sections[indices[2]].coordinates[halfLon], CalipsoData[indices[0]].curtains[indices[1]].sections[indices[2]].coordinates[halfLat], 50000.0),
+                    heading: Cesium.Math.toRadians(90.0), // east, default value is 0.0 (north)
+                    pitch: Cesium.Math.toRadians(-45), // default value (looking down)
+                    roll: 0.0 // default value
+                });
+                viewer.camera.zoomOut(10000000);
+
             } else {
-                trackColor = Cesium.Color.BLUE;
+                console.log("Its a data curtain");
+                // It is a Data Curtain, display Marker --Toggle
+                for (var j = 0; j < viewer.entities.values.length; j++) {
+                    //console.log(viewer.entities.values.length);
+                    var entityToHide = viewer.entities.values[j];
+                    if (!entityToHide.show)
+                        entityToHide.show = !entityToHide.show;
+                }
+                document.getElementsByName(name)[0].id = "pb_item_data";
+                var coords = CalipsoData[indices[0]].curtains[indices[1]].sections[indices[2]].coordinates;
+                var maxHts = new Array(2);
+                for (var j = 0; j < (2); j++) {
+                    maxHts[j] = 500000;
+                }
+                setTimeout(function() {
+                    if (CalipsoData[indices[0]].curtains[indices[1]].orbit == "Daytime") {
+                        trackColor = Cesium.Color.RED;
+                    } else {
+                        trackColor = Cesium.Color.BLUE;
+                    }
+                    entityInstance.wall.outline = true;
+                    entityInstance.wall.material = trackColor;
+
+
+                }, 1);
             }
-            entityInstance.wall.outline = true;
-            entityInstance.wall.material = trackColor;
+            entityInstance.wall.maximumHeights = maxHts;
 
-
-        }, 1);
+        }
     }
-    entityInstance.wall.maximumHeights = maxHts;
-
-}
-}
-console.log("I am done");
+    console.log("I am done");
 }
 
-
+/*
+ * Hover over event from a list item in the Profile Browser
+ * @param {String} name
+ */
 function leftDiv(name) {
     console.log("Left  " + name);
 
@@ -649,15 +606,76 @@ function leftDiv(name) {
     }
 }
 
+/*
+ * Toggle between markers and LiDAR curtains
+ */
 function toggleMarkers() {
-clickableDivs = !clickableDivs; 
- for (var j = 0; j < viewer.entities.values.length; j++) {
- 		//console.log(viewer.entities.values.length);
-		var entityToHide = viewer.entities.values[j];
-		if(entityToHide.wall.outline._value == true)
-		entityToHide.show = !entityToHide.show;
+    clickableDivs = !clickableDivs;
+    for (var j = 0; j < viewer.entities.values.length; j++) {
+
+        var entityToHide = viewer.entities.values[j];
+        if (entityToHide.wall.outline._value == true)
+            entityToHide.show = !entityToHide.show;
+    }
 }
-}
+
+var provider = new Cesium.WebMapTileServiceImageryProvider({
+    url: "//map1.vis.earthdata.nasa.gov/wmts-webmerc/wmts.cgi?TIME=2015-01-01",
+    layer: "MODIS_Aqua_CorrectedReflectance_TrueColor",
+    style: "",
+    format: "image/jpeg",
+    tileMatrixSetID: "GoogleMapsCompatible_Level9",
+    maximumLevel: 9,
+    tileWidth: 256,
+    tileHeight: 256,
+    tilingScheme: new Cesium.WebMercatorTilingScheme()
+});
+
+var viewer = new Cesium.Viewer("cesiumContainer", {
+    animation: false,
+    baseLayerPicker: false,
+    timeline: true,
+    imageryProvider: provider,
+
+});
+
+//Variable Initalizations
+var layers = viewer.scene.imageryLayers;
+
+var tempEntity, dateString, eId;
+var scene = viewer.scene;
+var ellipsoid = scene.globe.ellipsoid;
+handler = new Cesium.ScreenSpaceEventHandler(scene.canvas);
+var prevDate = "2015-01-01",
+    prevEId = -1,
+    firstVisualize = 0;
+var CalipsoData, content, clickableDivs = true;
+
+
+// Initialize the Timeline to date "2015-01-01"
+viewer.clock.startTime = Cesium.JulianDate.fromIso8601("2015-01-01"),
+    viewer.clock.currentTime = Cesium.JulianDate.fromIso8601("2015-01-02"),
+    viewer.clock.stopTime = Cesium.JulianDate.fromIso8601("2015-01-05"),
+    viewer.clock.clockRange = Cesium.ClockRange.LOOP_STOP,
+    viewer.clock.clockStep = Cesium.ClockStep.SYSTEM_CLOCK_MULTIPLIER
+
+
+// Update the Timeline to the Clock
+viewer.timeline.updateFromClock();
+viewer.timeline.zoomTo(viewer.clock.startTime, viewer.clock.stopTime);
+
+
+
+readJSON("2015-01-01", function(responseText) {
+    //Read metadata from 2015-01-01.json
+    CalipsoData = JSON.parse(responseText);
+    //Set the Clock to Jan 01, 2015
+    //Generate the markers from the JSON
+    visualize(CalipsoData, "2015-01-01", -1);
+
+});
+
+
 //Event Handler for Click
 handler.setInputAction(function(movement) {
     pickEntityClick(viewer, movement.position);
