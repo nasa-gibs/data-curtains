@@ -236,7 +236,7 @@ function pickEntityClick(viewer, windowPosition) {
                 for (var j = 0; j < (2); j++) {
                     maxHts[j] = 500000;
                 }
-                setTimeout(function() {
+
                     if (CalipsoData[indices[0]].curtains[indices[1]].orbit == "Daytime") {
                         trackColor = Cesium.Color.RED;
                     } else {
@@ -246,7 +246,6 @@ function pickEntityClick(viewer, windowPosition) {
                     entityInstance.wall.material = trackColor;
 
 
-                }, 1);
             }
             entityInstance.wall.maximumHeights = maxHts;
         }
