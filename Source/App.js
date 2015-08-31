@@ -1,4 +1,5 @@
 
+var dayTracks = true, nightTracks = false, markers = true;
 /*
  * Reads metadata from a .json file for the specified date
  * @param {String} metadata_date
@@ -19,6 +20,93 @@ function readJSON(metadata_date, callback) {
 }
 
 
+
+function toggleDN() {
+
+    dayTracks = !dayTracks;
+    nightTracks = !nightTracks;
+
+    if( dayTracks == true) {
+	    for (var j = 0; j < viewer.entities.values.length; j++) {
+	
+		var tEntity = viewer.entities.values[j];
+		if(tEntity.wall.outline._value == true && tEntity.wall.material.color._value.red == 1) {
+			if(tEntity.show == false)
+				tEntity.show = !tEntity.show;
+		} else if(tEntity.wall.outline._value == true){
+			if(tEntity.show == true)
+				tEntity.show = !tEntity.show;
+		}
+		
+	    }
+    } else if (nightTracks == true) {
+
+	    for (var j = 0; j < viewer.entities.values.length; j++) {
+	
+		var tEntity = viewer.entities.values[j];
+		if(tEntity.wall.outline._value == true && (tEntity.wall.material.color._value.blue == 1 || tEntity.wall.material.color._value.green == 0.5019607843137255)) {
+			if(tEntity.show == false)
+				tEntity.show = !tEntity.show;
+		} else if(tEntity.wall.outline._value == true){
+			if(tEntity.show == true)
+				tEntity.show = !tEntity.show;
+		}
+		
+	    }
+
+
+    }
+	if(dayTracks) {
+	var elements = document.getElementsByClassName("night");
+	for(var i=0; i<elements.length; i++)
+	    elements[i].style.display = "none";
+	elements = document.getElementsByClassName("day");
+	for(var i=0; i<elements.length; i++)
+	    elements[i].style.display = "block";
+	
+	} else if(nightTracks) {
+	var elements = document.getElementsByClassName("day");
+	for(var i=0; i<elements.length; i++) 
+	    elements[i].style.display = "none";
+	elements = document.getElementsByClassName("night");
+	for(var i=0; i<elements.length; i++) 
+	    elements[i].style.display = "block";
+	}
+}
+
+/*
+ * Toggle between markers and LiDAR curtains
+ */
+function toggleMarkers() {
+markers = !markers;
+clickableDivs = !clickableDivs;
+    if(dayTracks == true) {
+	    for (var j = 0; j < viewer.entities.values.length; j++) {
+	
+		var tEntity = viewer.entities.values[j];
+		if(tEntity.wall.outline._value == true && tEntity.wall.material.color._value.red == 1) {
+				tEntity.show = !tEntity.show;
+		}
+		
+	    }
+    } else if (nightTracks == true) {
+
+	    for (var j = 0; j < viewer.entities.values.length; j++) {
+	
+		var tEntity = viewer.entities.values[j];
+		if(tEntity.wall.outline._value == true && (tEntity.wall.material.color._value.blue == 1 || tEntity.wall.material.color._value.green == 0.5019607843137255)) {
+				tEntity.show = !tEntity.show;
+		}
+		
+	    }
+
+
+    }
+
+
+
+}
+
 /*
  * Adds the orbital tracks and LiDAR curtains for the specified date
  * @param {Array} CalipsoData
@@ -33,20 +121,21 @@ function visualize(CalipsoData, dateString, time) {
     }
 
     var trackColor, clickableDivs = true;
+    var showValue;
     if (prevDate != dateString || firstVisualize == 0) {
         document.getElementById("pb_list_items").innerHTML = "<div id=pb_item>Date: " + dateString + "</div><br>";
+        document.getElementById("pb_list_items").innerHTML += "<div id=pb_item class=day>Orbit: Daytime<br></div>";
+        document.getElementById("pb_list_items").innerHTML += "<div id=pb_item class=night>Orbit: Nighttime<br></div>";
     }
     for (var m = 0; m < CalipsoData[0].curtains.length; m++) {
         if (CalipsoData[0].curtains[m].orbit == "Daytime") {
-            if (prevDate != dateString || firstVisualize == 0) {
-                document.getElementById("pb_list_items").innerHTML += "<div id=pb_item>Orbit: Daytime</div><br>";
-            }
+
             trackColor = Cesium.Color.RED;
+	    showValue = dayTracks;
         } else {
-            if (prevDate != dateString || firstVisualize == 0) {
-                document.getElementById("pb_list_items").innerHTML += "<div id=pb_item>Orbit: Nighttime</div><br>";
-            }
+       
             trackColor = Cesium.Color.BLUE;
+	    showValue = nightTracks;
         }
 
 
@@ -55,8 +144,10 @@ function visualize(CalipsoData, dateString, time) {
             var flag = 0;
 
             if (prevDate != dateString || firstVisualize == 0) {
-
-                content = "<div id=pb_item_data name=D0C" + m + "S" + i + " onmouseover=hoveredDiv('D0C" + m + "S" + i + "'); onclick=clickedDiv('D0C" + m + "S" + i + "'); onmouseleave=leftDiv('D0C" + m + "S" + i + "');><table><tr><td><img src=" + CalipsoData[0].curtains[m].sections[i].img + " height=35 width=80/></td><td>&nbsp;Start Time: " + CalipsoData[0].curtains[m].sections[i].start_time + "<br>&nbsp;End Time: &nbsp;" + CalipsoData[0].curtains[m].sections[i].end_time + "</td></tr></table></div>";
+		if(CalipsoData[0].curtains[m].orbit == "Daytime")
+                content = "<div id=pb_item_data class=day name=D0C" + m + "S" + i + " onmouseover=hoveredDiv('D0C" + m + "S" + i + "'); onclick=clickedDiv('D0C" + m + "S" + i + "'); onmouseleave=leftDiv('D0C" + m + "S" + i + "');><table><tr><td><img src=" + CalipsoData[0].curtains[m].sections[i].img + " height=35 width=80/></td><td>&nbsp;Start Time: " + CalipsoData[0].curtains[m].sections[i].start_time + "<br>&nbsp;End Time: &nbsp;" + CalipsoData[0].curtains[m].sections[i].end_time + "</td></tr></table></div>";
+		if(CalipsoData[0].curtains[m].orbit == "Nighttime")
+                content = "<div id=pb_item_data class=night name=D0C" + m + "S" + i + " onmouseover=hoveredDiv('D0C" + m + "S" + i + "'); onclick=clickedDiv('D0C" + m + "S" + i + "'); onmouseleave=leftDiv('D0C" + m + "S" + i + "');><table><tr><td><img src=" + CalipsoData[0].curtains[m].sections[i].img + " height=35 width=80/></td><td>&nbsp;Start Time: " + CalipsoData[0].curtains[m].sections[i].start_time + "<br>&nbsp;End Time: &nbsp;" + CalipsoData[0].curtains[m].sections[i].end_time + "</td></tr></table></div>";
                 document.getElementById("pb_list_items").innerHTML += content;
             }
 
@@ -86,13 +177,13 @@ function visualize(CalipsoData, dateString, time) {
                         outlineWidth: 1.0,
                         outlineColor: Cesium.Color.BLACK
                     },
-                    show: true
+                    show: showValue
                 });
             }
 
         }
 
-        document.getElementById("pb_list_items").innerHTML += "<br>";
+        //document.getElementById("pb_list_items").innerHTML += "<br>";
 
     }
     if (prevEId != -1) {
@@ -134,6 +225,10 @@ function visualize(CalipsoData, dateString, time) {
 
     prevDate = dateString;
     firstVisualize = 1;
+	var elements = document.getElementsByClassName("night");
+	for(var i=0; i<elements.length; i++) {
+	    elements[i].style.display = "none";
+	}
 }
 
 
@@ -191,6 +286,13 @@ function pickEntityClick(viewer, windowPosition) {
     if (Cesium.defined(picked) && CalipsoData != null) {
         var entityInstance = Cesium.defaultValue(picked.id, picked.primitive.id);
         if (entityInstance instanceof Cesium.Entity) {
+
+
+    if (!clickableDivs) {
+        toggleMarkers();
+        return;
+    }
+
             var numberPattern = /\d+/g;
             var indices = entityInstance.id.match(numberPattern);
 
@@ -224,12 +326,7 @@ function pickEntityClick(viewer, windowPosition) {
 
 
             } else { // It is a Data Curtain, display Marker --Toggle
-                for (var j = 0; j < viewer.entities.values.length; j++) {
 
-                    var entityToHide = viewer.entities.values[j];
-                    if (!entityToHide.show)
-                        entityToHide.show = !entityToHide.show;
-                }
                 document.getElementsByName(entityInstance.id)[0].id = "pb_item_data";
                 var coords = CalipsoData[indices[0]].curtains[indices[1]].sections[indices[2]].coordinates;
                 var maxHts = new Array(2);
@@ -239,11 +336,16 @@ function pickEntityClick(viewer, windowPosition) {
 
                     if (CalipsoData[indices[0]].curtains[indices[1]].orbit == "Daytime") {
                         trackColor = Cesium.Color.RED;
+			if (dayTracks == false) 
+			   entityInstance.show = !entityInstance.show;
                     } else {
                         trackColor = Cesium.Color.BLUE;
+			if (nightTracks == false) 
+			   entityInstance.show = !entityInstance.show;
                     }
                     entityInstance.wall.outline = true;
                     entityInstance.wall.material = trackColor;
+		    
 
 
             }
@@ -286,7 +388,7 @@ function pickEntityHover(viewer, windowPosition) {
                 }
 
                 entityInstance.wall.material = trackColor;
-
+		console.log(entityInstance.wall.material.color._value);
 
             } else { //Data-Curtain
 
@@ -332,6 +434,15 @@ function pickEntityHover(viewer, windowPosition) {
                         maxHts[j] = 2000000;
                     }
 
+var entity = new Cesium.Entity({
+        name: "532nm Total Attenuated Backscatter"
+    });
+entity.description = {
+    getValue : function() {
+        return "Date : " + CalipsoData[0].date + "<br>Orbit : " + CalipsoData[0].curtains[indices[1]].orbit + "<br>Start Time (UTC) :  " + CalipsoData[0].curtains[indices[1]].sections[indices[2]].start_time + "<br>End Time (UTC) : " + CalipsoData[0].curtains[indices[1]].sections[indices[2]].end_time;
+    }
+};
+viewer.selectedEntity = entity;
 
                     viewer.entities.add({
                         name: 'Atitude',
@@ -459,7 +570,7 @@ function handleSetTime(e) {
 
         prevEId = -1;
         viewer.entities.removeAll();
-
+	dayTracks = true, nightTracks = false, markers = true;
         readJSON(dateString, function(responseText) {
             CalipsoData = JSON.parse(responseText);
             visualize(CalipsoData, dateString, gregorian);
@@ -547,19 +658,14 @@ function clickedDiv(name) {
             } else {
                 console.log("Its a data curtain");
                 // It is a Data Curtain, display Marker --Toggle
-                for (var j = 0; j < viewer.entities.values.length; j++) {
-                    //console.log(viewer.entities.values.length);
-                    var entityToHide = viewer.entities.values[j];
-                    if (!entityToHide.show)
-                        entityToHide.show = !entityToHide.show;
-                }
+    
                 document.getElementsByName(name)[0].id = "pb_item_data";
                 var coords = CalipsoData[indices[0]].curtains[indices[1]].sections[indices[2]].coordinates;
                 var maxHts = new Array(2);
                 for (var j = 0; j < (2); j++) {
                     maxHts[j] = 500000;
                 }
-                setTimeout(function() {
+
                     if (CalipsoData[indices[0]].curtains[indices[1]].orbit == "Daytime") {
                         trackColor = Cesium.Color.RED;
                     } else {
@@ -567,9 +673,9 @@ function clickedDiv(name) {
                     }
                     entityInstance.wall.outline = true;
                     entityInstance.wall.material = trackColor;
-
-
-                }, 1);
+	    if(entityInstance.show == true && markers == false)
+	    entityInstance.show = !entityInstance.show;
+	      
             }
             entityInstance.wall.maximumHeights = maxHts;
 
@@ -605,18 +711,7 @@ function leftDiv(name) {
     }
 }
 
-/*
- * Toggle between markers and LiDAR curtains
- */
-function toggleMarkers() {
-    clickableDivs = !clickableDivs;
-    for (var j = 0; j < viewer.entities.values.length; j++) {
 
-        var entityToHide = viewer.entities.values[j];
-        if (entityToHide.wall.outline._value == true)
-            entityToHide.show = !entityToHide.show;
-    }
-}
 
 var provider = new Cesium.WebMapTileServiceImageryProvider({
     url: "//map1.vis.earthdata.nasa.gov/wmts-webmerc/wmts.cgi?TIME=2015-01-01",
