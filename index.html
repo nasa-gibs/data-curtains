@@ -48,7 +48,7 @@ color: #fff;
 height: 400px;
 max-height: 400px;
 }
-#pb_item {
+#pb_item{
 text-align:center;
 color:#fff;
 padding:5px;
@@ -105,8 +105,12 @@ img {
 <div id="pb_head"><h3>Profile Browser</h3></div>
 <div id = "pb_list" class="scroll-pane horizontal-only"><p><div id="pb_list_items"></div></p></div>
 
-<div id="pb_toggle"><input id ="myButton" style="border-bottom-left-radius:5px;
-border-bottom-right-radius:5px;" type="button" value="Toggle Orbital Tracks" onClick="toggleMarkers();"/></div>
+<div id="pb_toggle">
+<input id ="myButton" style="border-radius:5px;
+border-bottom-right-radius:5px;" type="button" value="Toggle Orbital Tracks" onClick="toggleMarkers();"/>
+<input id ="myButton" style="margin-top:5px; border-bottom-left-radius:5px;
+border-bottom-right-radius:5px;" type="button" value="Toggle Day/Night Orbits" onClick="toggleDN();"/>
+</div>
 </div>
 
   <div id="cesiumContainer"></div>
