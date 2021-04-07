@@ -547,7 +547,7 @@ function handleSetTime(e) {
 
             layers.addImageryProvider(new Cesium.WebMapTileServiceImageryProvider({
 
-                url: "http://map1.vis.earthdata.nasa.gov/wmts-webmerc/wmts.cgi?TIME=" + dateString, //Date changes dynamically, from the Cesium Timeline Widget input.
+                url: "https://gibs.earthdata.nasa.gov/wmts-webmerc/wmts.cgi?TIME=" + dateString, //Date changes dynamically, from the Cesium Timeline Widget input.
                 layer: "MODIS_Aqua_CorrectedReflectance_TrueColor",
                 style: "",
                 format: "image/jpeg",
@@ -714,7 +714,7 @@ function leftDiv(name) {
 
 
 var provider = new Cesium.WebMapTileServiceImageryProvider({
-    url: "//map1.vis.earthdata.nasa.gov/wmts-webmerc/wmts.cgi?TIME=2015-01-01",
+    url: "//gibs.earthdata.nasa.gov/wmts-webmerc/wmts.cgi?TIME=2015-01-01",
     layer: "MODIS_Aqua_CorrectedReflectance_TrueColor",
     style: "",
     format: "image/jpeg",

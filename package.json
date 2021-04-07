@@ -9,12 +9,12 @@
         "url": "https://github.com/pjcozzi/cesium-starter-app"
     },
     "dependencies": {
-        "express": "~4.9.x",
-        "compression": "1.0.8",
-        "request": "2.36.0",
-        "yargs": "1.2.6"
+        "compression": "^1.7.4",
+        "express": "^4.17.1",
+        "request": ">=2.68.0",
+        "yargs": "^16.2.0"
     },
     "engines": {
-      "node": "0.10.x"
+        "node": "0.10.x"
     }
 }
